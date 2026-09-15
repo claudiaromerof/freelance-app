@@ -45,26 +45,13 @@ async function loadRealState() {
     return true;
   } catch (error) {
     console.error("No se pudo cargar Google Sheets:", error);
-    toast("No se pudo conectar con Google Sheets.");
     return false;
   }
 }
 
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  if (!apiConfigured()) return Promise.resolve();
-
-  const snapshot = structuredClone(state);
-  saveQueue = saveQueue.then(async () => {
-    try {
-      await apiSave(snapshot);
-    } catch (error) {
-      console.error("No se pudo guardar en Google Sheets:", error);
-      toast("No se pudo guardar el cambio en Google Sheets.");
-      throw error;
-    }
-  });
-  return saveQueue;
+  return Promise.resolve();
 }
 
 function $(selector) { return document.querySelector(selector); }

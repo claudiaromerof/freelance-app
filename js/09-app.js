@@ -53,6 +53,10 @@ function refreshAll() {
 refreshAll();
   if (typeof populateSettingsForm === "function") populateSettingsForm();
 (async function initializeRealData(){
+  if (!getApiToken()) {
+    const token = window.prompt('Acceso privado · pega tu token de Apps Script:');
+    if (token) setApiToken(token);
+  }
   const connected = await loadRealState();
   if (connected) { refreshAll(); if (typeof populateSettingsForm === "function") populateSettingsForm(); }
 })();

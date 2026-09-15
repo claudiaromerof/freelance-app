@@ -62,6 +62,7 @@ $("#clientForm")?.addEventListener('submit', async event => {
   const old = structuredClone(state);
   if (id) { const index = state.clients.findIndex(c=>c.id===id); if (index<0) return toast('No se encontró el cliente.'); state.clients[index]=payload; }
   else state.clients.unshift(payload);
+  try { await apiSaveClient(payload); } catch (error) { state=old; refreshAll(); return toast(error.message || 'No se pudo guardar el cliente.'); }
   const ok = await persistAndRefresh();
   if (!ok) { state=old; refreshAll(); return; }
   event.currentTarget.reset(); closeModal('clientModal'); showSection('clients'); toast(id ? 'Cliente actualizado correctamente.' : 'Cliente guardado correctamente.');
@@ -76,19 +77,21 @@ $("#serviceForm")?.addEventListener('submit', async event => {
   const catalog=getCatalogItem(data.serviceCatalog);
   const payload={ id:id||newId('CNT'), clientId:data.clientId, serviceId:catalog?.id || existing?.serviceId || data.serviceCatalog || '', service:(catalog?.name || existing?.service || 'Servicio'), provider:(catalog?.provider || existing?.provider || ''), description:data.description.trim() || catalog?.description || '', start:data.start,end:data.end,quantity:Number(data.quantity||1),cost:Number(data.cost||0),price:Number(data.price||0),currency:data.currency||'USD',documentType:existing?.documentType || currentSettings().documentType,retentionApplies:existing?.retentionApplies || 'Según corresponda',retentionRate:existing?.retentionRate || Number(currentSettings().retentionRate||8),retentionAmount:existing?.retentionAmount || 0,netReceived:existing?.netReceived || 0,status:data.status||'Activo',payment:existing?.payment||'Pendiente',paymentDate:existing?.paymentDate||'',paymentMethod:existing?.paymentMethod||'',rheEmitted:existing?.rheEmitted||'No',rheNumber:existing?.rheNumber||'',rheDate:existing?.rheDate||'',notes:data.notes.trim() };
   const old=structuredClone(state); if(id){state.services[state.services.findIndex(s=>s.id===id)]=payload;}else state.services.unshift(payload);
+  try { await apiSaveContract(payload); } catch (error) { state=old; refreshAll(); return toast(error.message || 'No se pudo guardar la contratación.'); }
   const ok=await persistAndRefresh(); if(!ok){state=old;refreshAll();return;} closeModal('serviceModal');showSection('services');toast(id?'Servicio actualizado correctamente.':'Servicio guardado correctamente.');
 });
 
 $("#paymentForm")?.addEventListener('submit', async event=>{
   event.preventDefault(); const data=Object.fromEntries(new FormData(event.currentTarget).entries()); const service=state.services.find(s=>s.id===data.serviceId); if(!service)return toast('No se encontró el servicio.');
-  const old=structuredClone(state); service.payment=data.payment; service.paymentDate=data.payment==='Pagado'?(data.paymentDate||todayISO()):''; service.paymentMethod=data.payment==='Pagado'?(data.paymentMethod||''):''; if(data.notes?.trim()) service.notes=data.notes.trim();
-  const ok=await persistAndRefresh(); if(!ok){state=old;refreshAll();return;} closeModal('paymentModal');showSection('services');toast(data.payment==='Pagado'?'Pago registrado correctamente.':'Pago actualizado correctamente.');
+  if(data.payment !== 'Pagado') return toast('Para registrar un pago usa el flujo Cobro.');
+  return toast('Primero genera el cobro del cliente y luego registra el pago desde ese cobro.');
 });
 
 $("#catalogForm")?.addEventListener('submit', async event=>{
   event.preventDefault(); const data=Object.fromEntries(new FormData(event.currentTarget).entries()); if(!data.name?.trim())return toast('Escribe el nombre del servicio.');
   const id=data.catalogId?.trim(); const old=structuredClone(state); const payload={id:id||newId('SRV'),name:data.name.trim(),provider:data.provider.trim(),description:data.description.trim(),periodicity:data.periodicity,baseCurrency:data.baseCurrency,active:data.active};
   if(id){const i=state.catalog.findIndex(x=>x.id===id);if(i<0)return toast('No se encontró el servicio del catálogo.');state.catalog[i]=payload;}else state.catalog.push(payload);
+  try { await apiSaveCatalog(payload); } catch (error) { state=old; refreshAll(); return toast(error.message || 'No se pudo guardar el servicio del catálogo.'); }
   const ok=await persistAndRefresh();if(!ok){state=old;refreshAll();return;}closeModal('catalogModal');showSection('services');toast(id?'Servicio del catálogo actualizado.':'Servicio del catálogo creado.');
 });
 
@@ -186,13 +189,30 @@ function updateBillingPreview() {
 
 $("#billingForm")?.addEventListener("input", updateBillingPreview);
 $("#billingForm")?.addEventListener("change", updateBillingPreview);
-$("#billingForm")?.addEventListener("submit", event => {
+$("#billingForm")?.addEventListener("submit", async event => {
   event.preventDefault();
   const form = event.currentTarget;
   const calc = billingCalculation(form.elements.clientId.value);
   if (!calc.services.length) return toast("No quedan servicios pendientes para cobrar a este cliente.");
-  closeModal("billingModal");
-  downloadClientBilling(form.elements.clientId.value, { applyRetention: calc.apply, rate: calc.rate, gross: calc.gross, retained: calc.retained, net: calc.net, mode: calc.mode });
+  try {
+    const result = await apiCreateBilling({
+      ID_CLIENTE: form.elements.clientId.value,
+      ID_CONTRATACIONES: calc.services.map(s => s.id),
+      FECHA_COBRO: todayISO(),
+      APLICA_RETENCION_RHE: calc.apply ? 'Sí' : 'No',
+      TASA_RHE: calc.rate / 100,
+      MODO_RHE: calc.mode === 'net' ? 'NETO' : 'BRUTO',
+      MONTO_DESEADO: calc.mode === 'net' ? calc.net : calc.gross,
+      NOTAS: ''
+    });
+    closeModal("billingModal");
+    downloadClientBilling(form.elements.clientId.value, { applyRetention: calc.apply, rate: calc.rate, gross: calc.gross, retained: calc.retained, net: calc.net, mode: calc.mode });
+    await loadRealState();
+    refreshAll();
+    toast(`Cobro ${result?.cobro?.ID_COBRO || ''} generado correctamente.`);
+  } catch (error) {
+    toast(error.message || 'No se pudo generar el cobro.');
+  }
 });
 
 // CONFIGURACIÓN TRIBUTARIA / DOCUMENTARIA
