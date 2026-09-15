@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?=v2">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
@@ -36,6 +36,7 @@
   </svg>
 
   <div class="app-shell">
+
     <aside class="sidebar" id="sidebar">
       <div class="brand">
         <div class="brand-mark">CRF</div>
@@ -66,6 +67,7 @@
     </aside>
 
     <main class="main-content">
+
       <header class="topbar">
         <button class="mobile-menu" id="mobileMenu" aria-label="Abrir menú"><svg><use href="#i-menu"/></svg></button>
         <div class="search-box">
@@ -248,57 +250,36 @@
     </div>
   </div>
 
-  <!-- MODAL SERVICIO (¡MINIMALISTA Y SEGURO PARA SHEETS!) -->
+  <!-- MODAL SERVICIO / CONTRATACIÓN -->
   <div class="modal-backdrop" id="serviceModal">
-    <div class="modal">
-      <div class="modal-head">
-        <div><div class="eyebrow">CONTRATACIÓN</div><h2 id="serviceModalTitle">Nuevo servicio</h2></div>
-        <button class="close-button" data-close="serviceModal"><svg><use href="#i-close"/></svg></button>
-      </div>
+    <div class="modal wide">
+      <div class="modal-head"><div><div class="eyebrow">CONTRATACIÓN</div><h2 id="serviceModalTitle">Nuevo servicio</h2></div><button class="close-button" data-close="serviceModal"><svg><use href="#i-close"/></svg></button></div>
       <form id="serviceForm">
         <input type="hidden" name="serviceId" id="serviceId">
-        
-        <!-- ============================================== -->
-        <!-- ESTOS CAMPOS ESTÁN OCULTOS PARA QUE SHEETS NO FALLE -->
-        <!-- ============================================== -->
-        <input type="hidden" name="serviceCatalog" value="">
-        <input type="hidden" name="provider" value="">
-        <input type="hidden" name="description" value="">
-        <input type="hidden" name="start" value="2026-09-15">
-        <input type="hidden" name="end" value="2026-09-15">
-        <input type="hidden" name="quantity" value="1">
-        <input type="hidden" name="documentType" value="Recibo por Honorarios">
-        <input type="hidden" name="rheEmitted" value="No">
-        <input type="hidden" name="rheNumber" value="">
-        <input type="hidden" name="rheDate" value="">
-        <input type="hidden" name="payment" value="Pendiente">
-        <input type="hidden" name="paymentDate" value="">
-        <input type="hidden" name="paymentMethod" value="">
-        <input type="hidden" name="notes" value="">
-        <!-- ============================================== -->
-
-        <!-- ESTOS SON LOS ÚNICOS CAMPOS QUE VERÁS TÚ -->
         <div class="form-grid">
-          <label class="full">Cliente<select name="clientId" id="serviceClient" required></select></label>
-          <label class="full">Servicio que brindo<input name="service" required placeholder="Ej. Gestión web mensual"></label>
-          
-          <label>Lo que me cuesta a mí<input type="number" name="cost" id="serviceCost" step="0.01" min="0" value="0"></label>
-          <label>Lo que le cobro al cliente<input type="number" name="price" id="servicePrice" step="0.01" min="0" required></label>
-          
+          <label>Cliente<select name="clientId" id="serviceClient" required></select></label>
+          <label>Servicio del catálogo<select name="serviceCatalog" id="serviceCatalog"></select></label>
+          <label>Nombre del servicio<input name="service" required placeholder="Ej. Gestión web mensual"></label>
+          <label>Proveedor<input name="provider" placeholder="Ej. Wix, Google"></label>
+          <label class="full">Descripción<input name="description"></label>
+          <label>Fecha de inicio<input type="date" name="start" required></label>
+          <label>Fecha de fin<input type="date" name="end" required></label>
+          <label>Cantidad<input type="number" name="quantity" min="1" value="1" required></label>
           <label>Moneda<select name="currency"><option>USD</option><option>PEN</option></select></label>
-          <label>Estado<select name="status"><option>Activo</option><option>Finalizado</option></select></label>
+          <label>Costo real<input type="number" name="cost" step="0.01" min="0" value="0"></label>
+          <label>Precio cliente<input type="number" name="price" step="0.01" min="0" required></label>
+          <label>Comprobante<select name="documentType"><option>Recibo por Honorarios</option></select></label>
+          <label>RHE emitido<select name="rheEmitted"><option>No</option><option>Sí</option></select></label>
+          <label>N.° RHE<input name="rheNumber" placeholder="Ej. E001-123"></label>
+          <label>Fecha RHE<input type="date" name="rheDate"></label>
+          <label>Estado servicio<select name="status"><option>Activo</option><option>Pendiente</option><option>Finalizado</option></select></label>
+          <label>Estado de pago<select name="payment"><option>Pendiente</option><option>Pagado</option></select></label>
+          <label>Fecha de pago<input type="date" name="paymentDate"></label>
+          <label>Medio de pago<select name="paymentMethod"><option value="">—</option><option>Transferencia</option><option>Yape / Plin</option><option>Tarjeta</option><option>Efectivo</option><option>Otro</option></select></label>
+          <label class="full">Notas<textarea name="notes" rows="3"></textarea></label>
         </div>
-        
-        <div class="profit-preview">
-          <span>Ganancia interna real</span>
-          <strong id="profitPreview" style="color: var(--green);">$0.00</strong>
-          <small>No se muestra al cliente.</small>
-        </div>
-        
-        <div class="modal-actions">
-          <button type="button" class="secondary-button" data-close="serviceModal">Cancelar</button>
-          <button class="primary-button" type="submit"><span id="serviceSubmitLabel">Guardar servicio</span></button>
-        </div>
+        <div class="profit-preview"><span>Ganancia interna</span><strong id="profitPreview">$0.00</strong><small>No se muestra al cliente.</small></div>
+                <div class="modal-actions"><button type="button" class="secondary-button" data-close="serviceModal">Cancelar</button><button class="primary-button" type="submit"><span id="serviceSubmitLabel">Guardar servicio</span></button></div>
       </form>
     </div>
   </div>
@@ -339,46 +320,29 @@
     </div>
   </div>
 
-  <!-- MODAL COBRO (¡LÓGICA MATEMÁTICA SUNAT AL 8%!) -->
+  <!-- MODAL COBRO AGRUPADO -->
   <div class="modal-backdrop" id="billingModal">
     <div class="modal wide">
-      <div class="modal-head">
-        <div><div class="eyebrow">COBRO</div><h2>Generar cobro</h2><p id="billingClientName"></p></div>
-        <button class="close-button" data-close="billingModal"><svg><use href="#i-close"/></svg></button>
-      </div>
+      <div class="modal-head"><div><div class="eyebrow">COBRO</div><h2>Generar cobro</h2><p id="billingClientName"></p></div><button class="close-button" data-close="billingModal"><svg><use href="#i-close"/></svg></button></div>
       <form id="billingForm">
         <input type="hidden" name="clientId">
-        <!-- Campos ocultos requeridos por tu sistema -->
-        <input type="hidden" name="mode" value="net">
-        <input type="hidden" name="amount" value="">
-
         <div class="billing-summary-card">
-          <div><span>Servicios pendientes (Lo que vas a recibir tú)</span><strong id="billingBaseTotal">$0.00</strong></div>
+          <div><span>Servicios pendientes</span><strong id="billingBaseTotal">$0.00</strong></div>
           <div><span>Comprobante</span><strong>Recibo por Honorarios</strong></div>
         </div>
-
-        <div class="form-grid" style="margin-top: 15px;">
-          <label class="full check-field">
-            <input type="checkbox" id="billingRetentionCheck" name="retention" value="Sí" checked>
-            <span>
-              <strong>Añadir 8% de retención (SUNAT)</strong>
-              <small>Esto calculará el monto bruto exacto para que, tras el 8%, recibas tu dinero íntegro.</small>
-            </span>
-          </label>
+        <div class="form-grid">
+          <label class="full check-field"><input type="checkbox" id="billingRetentionCheck" name="retention" value="Sí"><span><strong>Considerar retención RHE</strong><small>La tasa configurada es <b id="billingRateLabel">8%</b>. Se calcula para que tu neto no reduzca el monto que deseas recibir.</small></span></label>
+          <label>El monto ingresado corresponde a<select name="mode"><option value="gross">Honorario bruto</option><option value="net">Monto neto que quiero recibir</option></select></label>
+          <label id="billingAmountField" style="display:none">Monto neto que quiero recibir<input type="number" name="amount" step="0.01" min="0" placeholder="Ej. 2000.00"><small class="field-help">La app calculará el honorario bruto necesario para que, después de la retención, recibas este monto.</small></label>
         </div>
-
         <div class="billing-calculation">
-          <div><span>Monto líquido para ti (Neto)</span><strong id="billingNet">$0.00</strong></div>
-          <div><span>Retención SUNAT (8%)</span><strong id="billingRetention" style="color: #8c5b5b;">$0.00</strong></div>
-          <div class="billing-total">
-            <span>Total a cobrarle al cliente (Bruto)</span><strong id="billingGross" style="font-size: 24px; color: var(--green);">$0.00</strong>
-          </div>
+          <div><span>Modo</span><strong id="billingModeLabel">Sin retención</strong></div>
+          <div><span>Honorarios</span><strong id="billingGross">$0.00</strong></div>
+          <div><span>Retención RHE</span><strong id="billingRetention">$0.00</strong></div>
+          <div class="billing-total"><span>Neto a pagar</span><strong id="billingNet">$0.00</strong></div>
         </div>
-
-        <div class="modal-actions" style="margin-top: 25px;">
-          <button type="button" class="secondary-button" data-close="billingModal">Cancelar</button>
-          <button class="primary-button" type="submit"><svg><use href="#i-download"/></svg> Generar PDF</button>
-        </div>
+        <div class="field-note full" id="billingHint">Sin retención: el total del cobro es igual a la suma de los servicios.</div>
+        <div class="modal-actions"><button type="button" class="secondary-button" data-close="billingModal">Cancelar</button><button class="primary-button" type="submit"><svg><use href="#i-download"/></svg> Generar PDF</button></div>
       </form>
     </div>
   </div>
@@ -410,10 +374,9 @@
   </div>
 
   <div class="toast" id="toast"></div>
-  
   <script src="js/00-config.js"></script>
-  <script src="js/00-api.js"></script>
-  <script src="js/01-core.js"></script>
+    <script src="js/00-api.js"></script>
+    <script src="js/01-core.js"></script>
   <script src="js/02-dashboard.js"></script>
   <script src="js/03-clients.js"></script>
   <script src="js/04-services.js"></script>

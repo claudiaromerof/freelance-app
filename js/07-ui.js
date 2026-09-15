@@ -6,31 +6,6 @@ function populateClientSelects() {
   if ($("#quoteClient")) $("#quoteClient").innerHTML = options;
 }
 
-
-// NAVEGACIÓN PRINCIPAL
-function showSection(sectionId) {
-  const sections = $$('.page-section');
-  sections.forEach(section => section.classList.toggle('active', section.id === sectionId));
-
-  $$('.nav-item[data-section]').forEach(button => {
-    button.classList.toggle('active', button.dataset.section === sectionId);
-  });
-
-  $$('.[data-section-link]').forEach(button => {
-    button.classList.toggle('active', button.dataset.sectionLink === sectionId);
-  });
-
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-$$('.nav-item[data-section]').forEach(button => {
-  button.addEventListener('click', () => showSection(button.dataset.section));
-});
-
-$$('[data-section-link]').forEach(button => {
-  button.addEventListener('click', () => showSection(button.dataset.sectionLink));
-});
-
 function openModal(id) { populateClientSelects(); if (typeof populateCatalogSelect === "function") populateCatalogSelect(); $(`#${id}`)?.classList.add("open"); }
 function closeModal(id) { $(`#${id}`)?.classList.remove("open"); }
 
@@ -146,8 +121,8 @@ function openBillingModal(clientId) {
   if (!form) return toast("No se encontró el formulario de cobro.");
   form.reset();
   form.elements.clientId.value = clientId;
-  form.elements.retention.value = "No";
-  form.elements.mode.value = "gross";
+  form.elements.retention.checked = true;
+  form.elements.mode.value = "net";
   form.elements.amount.value = "";
   $("#billingClientName").textContent = client.name || "Cliente";
   $("#billingRateLabel").textContent = `${Number(currentSettings().retentionRate || 8)}%`;
@@ -202,6 +177,9 @@ function updateBillingPreview() {
   $("#billingModeLabel").textContent = mode;
   const amount = $("#billingAmountField");
   if (amount) amount.style.display = calc.apply && calc.mode === "net" ? "block" : "none";
+  if (calc.apply && calc.mode === "net" && amount && form.elements.amount && !form.elements.amount.value) {
+    form.elements.amount.value = calc.baseTotal.toFixed(2);
+  }
   const note = $("#billingHint");
   if (note) note.textContent = calc.apply ? `Retención RHE ${calc.rate}% aplicada solo en este cobro. El cálculo no modifica los precios guardados de los servicios.` : "Sin retención: el total del cobro es igual a la suma de los servicios.";
 }
