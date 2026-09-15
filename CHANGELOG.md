@@ -8,4 +8,4 @@
 - PDF único por cliente con todos los servicios pendientes.
 - Cada servicio conserva sus fechas individuales.
 - Edición de servicios y cotizaciones.
-- Pago y datos de RHE administrables desde la app.
+- Pago administrable desde la app; la configuración de RHE se realiza en Cobro.

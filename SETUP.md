@@ -44,4 +44,4 @@ La carpeta `backend/` puede conservarse en GitHub como copia/versionado del back
 7. Registrar un pago.
 8. Generar Cobro desde el cliente.
 9. Verificar que el PDF agrupe únicamente servicios pendientes y conserve el periodo individual de cada servicio.
-10. Crear y editar una cotización con cada opción de IGV.
+10. Crear y editar una cotización y generar su PDF.

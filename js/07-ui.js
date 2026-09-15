@@ -21,7 +21,7 @@ function resetClientForm() {
 }
 function resetServiceForm() {
   const form = $("#serviceForm"); if (!form) return;
-  form.reset(); form.elements.serviceId.value = ""; form.elements.quantity.value = 1; form.elements.payment.value = "Pendiente"; form.elements.status.value = "Activo"; form.elements.documentType.value = currentSettings().documentType; form.elements.rheEmitted.value = "No";
+  form.reset(); form.elements.serviceId.value = ""; form.elements.quantity.value = 1; form.elements.status.value = "Activo"; form.elements.currency.value = "USD";
   populateCatalogSelect(); $("#serviceModalTitle").textContent = "Nuevo servicio"; $("#serviceSubmitLabel").textContent = "Guardar servicio"; updateProfitPreview();
 }
 function resetQuoteForm() {
@@ -70,7 +70,7 @@ $("#clientForm")?.addEventListener('submit', async event => {
 $("#serviceForm")?.addEventListener('submit', async event => {
   event.preventDefault();
   const data = Object.fromEntries(new FormData(event.currentTarget).entries());
-  if (!data.clientId || !data.service?.trim()) return toast('Completa cliente y servicio.');
+  if (!data.clientId || !data.serviceCatalog) return toast('Completa cliente y servicio.');
   if (!data.start || !data.end || data.end < data.start) return toast('Revisa el periodo del servicio.');
   const id=data.serviceId?.trim(); const existing=id ? state.services.find(s=>s.id===id) : null; if (id && !existing) return toast('No se encontró el servicio.');
   const catalog=getCatalogItem(data.serviceCatalog);
