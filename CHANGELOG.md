@@ -1,11 +1,7 @@
-# Changelog — V1 PRO RHE
+# Claudia RF V1 — Corrección de conexión
 
-## Cobro PRO
-- Retención RHE trasladada al momento de generar el cobro.
-- Check `Aplicar retención RHE`.
-- Modo `Honorario bruto` o `Monto neto que quiero recibir`.
-- Cálculo automático de bruto, retención y neto.
-- PDF único por cliente con todos los servicios pendientes.
-- Cada servicio conserva sus fechas individuales.
-- Edición de servicios y cotizaciones.
-- Pago administrable desde la app; la configuración de RHE se realiza en Cobro.
+- Se eliminó el uso de fetch/CORS para las llamadas a Apps Script desde GitHub Pages.
+- La app usa JSONP para GET y también para operaciones de escritura, evitando el preflight OPTIONS que provoca “Failed to fetch”.
+- El backend acepta las operaciones V2 por doGet cuando se envía `callback` y `payload`.
+- El PIN sigue validándose en Apps Script y no se guarda en el código del frontend.
+- Se corrigió el doble `quotes` del adaptador de estado.
