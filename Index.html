@@ -1,0 +1,1493 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Freelance App</title>
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+  <!-- =========================
+       APP
+  ========================== -->
+
+  <div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+      <div class="brand">
+        <div class="brand-mark">F</div>
+
+        <div class="brand-text">
+          <strong>Freelance</strong>
+          <span>Management</span>
+        </div>
+      </div>
+
+
+      <nav class="navigation">
+
+        <button
+          class="nav-item active"
+          data-view="dashboard"
+          onclick="showView('dashboard')"
+        >
+          <span class="nav-icon">⌂</span>
+          <span>Inicio</span>
+        </button>
+
+
+        <button
+          class="nav-item"
+          data-view="clientes"
+          onclick="showView('clientes')"
+        >
+          <span class="nav-icon">♙</span>
+          <span>Clientes</span>
+        </button>
+
+
+        <button
+          class="nav-item"
+          data-view="servicios"
+          onclick="showView('servicios')"
+        >
+          <span class="nav-icon">▣</span>
+          <span>Servicios</span>
+        </button>
+
+
+        <button
+          class="nav-item"
+          data-view="finanzas"
+          onclick="showView('finanzas')"
+        >
+          <span class="nav-icon">$</span>
+          <span>Finanzas</span>
+        </button>
+
+
+        <button
+          class="nav-item"
+          data-view="historial"
+          onclick="showView('historial')"
+        >
+          <span class="nav-icon">◷</span>
+          <span>Historial</span>
+        </button>
+
+      </nav>
+
+
+      <div class="sidebar-bottom">
+
+        <button
+          class="nav-item"
+          data-view="configuracion"
+          onclick="showView('configuracion')"
+        >
+          <span class="nav-icon">⚙</span>
+          <span>Configuración</span>
+        </button>
+
+      </div>
+
+    </aside>
+
+
+    <!-- MAIN -->
+    <main class="main">
+
+      <!-- TOPBAR -->
+      <header class="topbar">
+
+        <div>
+          <div class="breadcrumb">
+            Freelance
+          </div>
+
+          <h1 id="pageTitle">
+            Inicio
+          </h1>
+        </div>
+
+
+        <div class="topbar-actions">
+
+          <button
+            class="icon-button"
+            title="Notificaciones"
+          >
+            ♧
+          </button>
+
+
+          <div class="profile">
+
+            <div class="profile-avatar">
+              C
+            </div>
+
+            <div class="profile-info">
+              <strong>Claudia</strong>
+              <span>Administradora</span>
+            </div>
+
+          </div>
+
+        </div>
+
+      </header>
+
+
+      <!-- =========================
+           DASHBOARD
+      ========================== -->
+
+      <section
+        id="view-dashboard"
+        class="view active"
+      >
+
+        <div class="welcome">
+
+          <div>
+            <span class="eyebrow">
+              RESUMEN
+            </span>
+
+            <h2>
+              Hola, Claudia 👋
+            </h2>
+
+            <p>
+              Aquí tienes el resumen de tu actividad freelance.
+            </p>
+          </div>
+
+
+          <button
+            class="primary-button"
+            onclick="openNewService()"
+          >
+            + Nuevo servicio
+          </button>
+
+        </div>
+
+
+        <!-- KPI -->
+        <div class="stats-grid">
+
+          <article class="stat-card">
+
+            <div class="stat-header">
+              <span>Clientes</span>
+              <span class="stat-icon">♙</span>
+            </div>
+
+            <strong
+              id="statClients"
+              class="stat-number"
+            >
+              0
+            </strong>
+
+            <span class="stat-description">
+              clientes registrados
+            </span>
+
+          </article>
+
+
+          <article class="stat-card">
+
+            <div class="stat-header">
+              <span>Servicios activos</span>
+              <span class="stat-icon">▣</span>
+            </div>
+
+            <strong
+              id="statServices"
+              class="stat-number"
+            >
+              0
+            </strong>
+
+            <span class="stat-description">
+              servicios en curso
+            </span>
+
+          </article>
+
+
+          <article class="stat-card">
+
+            <div class="stat-header">
+              <span>Ventas</span>
+              <span class="stat-icon">$</span>
+            </div>
+
+            <strong
+              id="statSales"
+              class="stat-number"
+            >
+              $0.00
+            </strong>
+
+            <span class="stat-description">
+              valor de servicios
+            </span>
+
+          </article>
+
+
+          <article class="stat-card">
+
+            <div class="stat-header">
+              <span>Ganancia</span>
+              <span class="stat-icon">↗</span>
+            </div>
+
+            <strong
+              id="statProfit"
+              class="stat-number"
+            >
+              $0.00
+            </strong>
+
+            <span class="stat-description">
+              ganancia estimada
+            </span>
+
+          </article>
+
+        </div>
+
+
+        <!-- CONTENT GRID -->
+        <div class="dashboard-grid">
+
+
+          <!-- SERVICIOS -->
+          <section class="panel">
+
+            <div class="panel-header">
+
+              <div>
+                <h3>
+                  Servicios recientes
+                </h3>
+
+                <p>
+                  Tus últimas contrataciones
+                </p>
+              </div>
+
+
+              <button
+                class="text-button"
+                onclick="showView('servicios')"
+              >
+                Ver todos →
+              </button>
+
+            </div>
+
+
+            <div
+              id="dashboardServices"
+              class="table-container"
+            >
+
+              <div class="empty-state">
+                <div class="empty-icon">▣</div>
+
+                <strong>
+                  No hay servicios todavía
+                </strong>
+
+                <span>
+                  Cuando registres un servicio aparecerá aquí.
+                </span>
+              </div>
+
+            </div>
+
+          </section>
+
+
+          <!-- PRÓXIMOS VENCIMIENTOS -->
+          <section class="panel">
+
+            <div class="panel-header">
+
+              <div>
+                <h3>
+                  Próximos vencimientos
+                </h3>
+
+                <p>
+                  Servicios que están por terminar
+                </p>
+              </div>
+
+            </div>
+
+
+            <div
+              id="upcomingServices"
+              class="upcoming-list"
+            >
+
+              <div class="empty-state compact">
+
+                <div class="empty-icon">
+                  ◷
+                </div>
+
+                <strong>
+                  Sin vencimientos próximos
+                </strong>
+
+                <span>
+                  Aquí aparecerán los servicios próximos a finalizar.
+                </span>
+
+              </div>
+
+            </div>
+
+          </section>
+
+        </div>
+
+
+        <!-- QUICK ACTIONS -->
+        <section class="quick-actions">
+
+          <h3>
+            Acciones rápidas
+          </h3>
+
+
+          <div class="quick-grid">
+
+            <button
+              class="quick-card"
+              onclick="openNewClient()"
+            >
+
+              <span class="quick-icon">
+                +
+              </span>
+
+              <span>
+                <strong>Nuevo cliente</strong>
+                <small>Registrar un cliente</small>
+              </span>
+
+            </button>
+
+
+            <button
+              class="quick-card"
+              onclick="openNewService()"
+            >
+
+              <span class="quick-icon">
+                +
+              </span>
+
+              <span>
+                <strong>Nuevo servicio</strong>
+                <small>Registrar una contratación</small>
+              </span>
+
+            </button>
+
+
+            <button
+              class="quick-card"
+              onclick="showView('historial')"
+            >
+
+              <span class="quick-icon">
+                ◷
+              </span>
+
+              <span>
+                <strong>Ver historial</strong>
+                <small>Consultar precios anteriores</small>
+              </span>
+
+            </button>
+
+
+            <button
+              class="quick-card"
+              onclick="showView('finanzas')"
+            >
+
+              <span class="quick-icon">
+                $
+              </span>
+
+              <span>
+                <strong>Ver finanzas</strong>
+                <small>Revisar rentabilidad</small>
+              </span>
+
+            </button>
+
+          </div>
+
+        </section>
+
+      </section>
+
+
+      <!-- =========================
+           CLIENTES
+      ========================== -->
+
+      <section
+        id="view-clientes"
+        class="view"
+      >
+
+        <div class="page-heading">
+
+          <div>
+            <span class="eyebrow">
+              GESTIÓN
+            </span>
+
+            <h2>
+              Clientes
+            </h2>
+
+            <p>
+              Administra tus clientes y consulta su información.
+            </p>
+          </div>
+
+
+          <button
+            class="primary-button"
+            onclick="openNewClient()"
+          >
+            + Nuevo cliente
+          </button>
+
+        </div>
+
+
+        <div class="toolbar">
+
+          <div class="search-box">
+
+            <span>
+              ⌕
+            </span>
+
+            <input
+              type="search"
+              id="clientSearch"
+              placeholder="Buscar cliente..."
+              oninput="filterClients()"
+            >
+
+          </div>
+
+        </div>
+
+
+        <section class="panel">
+
+          <div
+            id="clientsList"
+            class="clients-list"
+          >
+
+            <div class="empty-state">
+
+              <div class="empty-icon">
+                ♙
+              </div>
+
+              <strong>
+                Cargando clientes...
+              </strong>
+
+            </div>
+
+          </div>
+
+        </section>
+
+      </section>
+
+
+      <!-- =========================
+           SERVICIOS
+      ========================== -->
+
+      <section
+        id="view-servicios"
+        class="view"
+      >
+
+        <div class="page-heading">
+
+          <div>
+
+            <span class="eyebrow">
+              CONTRATACIONES
+            </span>
+
+            <h2>
+              Servicios
+            </h2>
+
+            <p>
+              Controla tus servicios, precios, costos y estados.
+            </p>
+
+          </div>
+
+
+          <button
+            class="primary-button"
+            onclick="openNewService()"
+          >
+            + Nuevo servicio
+          </button>
+
+        </div>
+
+
+        <div class="toolbar">
+
+          <div class="search-box">
+
+            <span>
+              ⌕
+            </span>
+
+            <input
+              type="search"
+              id="serviceSearch"
+              placeholder="Buscar servicio o cliente..."
+              oninput="filterServices()"
+            >
+
+          </div>
+
+
+          <select
+            id="serviceStatusFilter"
+            onchange="filterServices()"
+            class="select-control"
+          >
+
+            <option value="">
+              Todos los estados
+            </option>
+
+            <option value="Activo">
+              Activos
+            </option>
+
+            <option value="Finalizado">
+              Finalizados
+            </option>
+
+          </select>
+
+
+          <select
+            id="paymentStatusFilter"
+            onchange="filterServices()"
+            class="select-control"
+          >
+
+            <option value="">
+              Todos los pagos
+            </option>
+
+            <option value="Pagado">
+              Pagados
+            </option>
+
+            <option value="Pendiente">
+              Pendientes
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <section class="panel">
+
+          <div
+            id="servicesList"
+            class="services-list"
+          >
+
+            <div class="empty-state">
+
+              <div class="empty-icon">
+                ▣
+              </div>
+
+              <strong>
+                Cargando servicios...
+              </strong>
+
+            </div>
+
+          </div>
+
+        </section>
+
+      </section>
+
+
+      <!-- =========================
+           FINANZAS
+      ========================== -->
+
+      <section
+        id="view-finanzas"
+        class="view"
+      >
+
+        <div class="page-heading">
+
+          <div>
+
+            <span class="eyebrow">
+              CONTROL FINANCIERO
+            </span>
+
+            <h2>
+              Finanzas
+            </h2>
+
+            <p>
+              Revisa costos, precios y rentabilidad de tus servicios.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="stats-grid">
+
+          <article class="stat-card">
+
+            <div class="stat-header">
+              <span>Ingresos</span>
+              <span class="stat-icon">$</span>
+            </div>
+
+            <strong
+              id="financeSales"
+              class="stat-number"
+            >
+              $0.00
+            </strong>
+
+            <span class="stat-description">
+              total vendido
+            </span>
+
+          </article>
+
+
+          <article class="stat-card">
+
+            <div class="stat-header">
+              <span>Costos</span>
+              <span class="stat-icon">−</span>
+            </div>
+
+            <strong
+              id="financeCosts"
+              class="stat-number"
+            >
+              $0.00
+            </strong>
+
+            <span class="stat-description">
+              costos reales
+            </span>
+
+          </article>
+
+
+          <article class="stat-card">
+
+            <div class="stat-header">
+              <span>Ganancia</span>
+              <span class="stat-icon">↗</span>
+            </div>
+
+            <strong
+              id="financeProfit"
+              class="stat-number"
+            >
+              $0.00
+            </strong>
+
+            <span class="stat-description">
+              ganancia total
+            </span>
+
+          </article>
+
+
+          <article class="stat-card">
+
+            <div class="stat-header">
+              <span>Margen</span>
+              <span class="stat-icon">%</span>
+            </div>
+
+            <strong
+              id="financeMargin"
+              class="stat-number"
+            >
+              0%
+            </strong>
+
+            <span class="stat-description">
+              margen promedio
+            </span>
+
+          </article>
+
+        </div>
+
+
+        <section class="panel">
+
+          <div class="panel-header">
+
+            <div>
+
+              <h3>
+                Rentabilidad por servicio
+              </h3>
+
+              <p>
+                Comparación entre costo y precio al cliente.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div
+            id="financeTable"
+            class="table-container"
+          >
+
+            <div class="empty-state">
+
+              <div class="empty-icon">
+                $
+              </div>
+
+              <strong>
+                No hay información financiera
+              </strong>
+
+              <span>
+                Registra servicios para comenzar a ver tus resultados.
+              </span>
+
+            </div>
+
+          </div>
+
+        </section>
+
+      </section>
+
+
+      <!-- =========================
+           HISTORIAL
+      ========================== -->
+
+      <section
+        id="view-historial"
+        class="view"
+      >
+
+        <div class="page-heading">
+
+          <div>
+
+            <span class="eyebrow">
+              HISTÓRICO
+            </span>
+
+            <h2>
+              Historial
+            </h2>
+
+            <p>
+              Consulta los servicios y precios registrados anteriormente.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <section class="panel">
+
+          <div class="panel-header">
+
+            <div>
+
+              <h3>
+                Historial de servicios
+              </h3>
+
+              <p>
+                Los registros anteriores se conservan para comparar precios.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div
+            id="historyList"
+            class="table-container"
+          >
+
+            <div class="empty-state">
+
+              <div class="empty-icon">
+                ◷
+              </div>
+
+              <strong>
+                Cargando historial...
+              </strong>
+
+            </div>
+
+          </div>
+
+        </section>
+
+      </section>
+
+
+      <!-- =========================
+           CONFIGURACIÓN
+      ========================== -->
+
+      <section
+        id="view-configuracion"
+        class="view"
+      >
+
+        <div class="page-heading">
+
+          <div>
+
+            <span class="eyebrow">
+              SISTEMA
+            </span>
+
+            <h2>
+              Configuración
+            </h2>
+
+            <p>
+              Configuración general de tu aplicación.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <section class="panel settings-panel">
+
+          <div class="setting-row">
+
+            <div>
+
+              <strong>
+                Moneda principal
+              </strong>
+
+              <span>
+                Moneda utilizada para mostrar los valores.
+              </span>
+
+            </div>
+
+
+            <select class="select-control">
+
+              <option>
+                USD — Dólares
+              </option>
+
+              <option>
+                PEN — Soles
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="setting-row">
+
+            <div>
+
+              <strong>
+                Datos
+              </strong>
+
+              <span>
+                Los datos comerciales se conectarán posteriormente con tu base privada.
+              </span>
+
+            </div>
+
+            <span class="status-badge status-active">
+              Conexión pendiente
+            </span>
+
+          </div>
+
+        </section>
+
+      </section>
+
+    </main>
+
+  </div>
+
+
+  <!-- =========================
+       MODAL CLIENTE
+  ========================== -->
+
+  <div
+    id="clientModal"
+    class="modal-overlay hidden"
+  >
+
+    <div class="modal">
+
+      <div class="modal-header">
+
+        <div>
+
+          <span class="eyebrow">
+            CLIENTE
+          </span>
+
+          <h2>
+            Nuevo cliente
+          </h2>
+
+        </div>
+
+
+        <button
+          class="modal-close"
+          onclick="closeModal('clientModal')"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <form
+        id="clientForm"
+        onsubmit="saveClient(event)"
+      >
+
+        <div class="form-grid">
+
+          <div class="form-field full">
+
+            <label>
+              Nombre / empresa
+            </label>
+
+            <input
+              type="text"
+              id="clientName"
+              required
+              placeholder="Ej. Empresa ABC"
+            >
+
+          </div>
+
+
+          <div class="form-field">
+
+            <label>
+              Contacto
+            </label>
+
+            <input
+              type="text"
+              id="clientContact"
+              placeholder="Nombre de contacto"
+            >
+
+          </div>
+
+
+          <div class="form-field">
+
+            <label>
+              Email
+            </label>
+
+            <input
+              type="email"
+              id="clientEmail"
+              placeholder="cliente@email.com"
+            >
+
+          </div>
+
+
+          <div class="form-field">
+
+            <label>
+              Teléfono
+            </label>
+
+            <input
+              type="text"
+              id="clientPhone"
+              placeholder="+51..."
+            >
+
+          </div>
+
+
+          <div class="form-field">
+
+            <label>
+              País
+            </label>
+
+            <input
+              type="text"
+              id="clientCountry"
+              placeholder="Perú"
+            >
+
+          </div>
+
+
+          <div class="form-field full">
+
+            <label>
+              Notas
+            </label>
+
+            <textarea
+              id="clientNotes"
+              rows="3"
+              placeholder="Información adicional..."
+            ></textarea>
+
+          </div>
+
+        </div>
+
+
+        <div class="modal-actions">
+
+          <button
+            type="button"
+            class="secondary-button"
+            onclick="closeModal('clientModal')"
+          >
+            Cancelar
+          </button>
+
+          <button
+            type="submit"
+            class="primary-button"
+          >
+            Guardar cliente
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================
+       MODAL SERVICIO
+  ========================== -->
+
+  <div
+    id="serviceModal"
+    class="modal-overlay hidden"
+  >
+
+    <div class="modal modal-large">
+
+      <div class="modal-header">
+
+        <div>
+
+          <span class="eyebrow">
+            CONTRATACIÓN
+          </span>
+
+          <h2>
+            Nuevo servicio
+          </h2>
+
+        </div>
+
+
+        <button
+          class="modal-close"
+          onclick="closeModal('serviceModal')"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <form
+        id="serviceForm"
+        onsubmit="saveService(event)"
+      >
+
+        <div class="form-grid">
+
+          <div class="form-field">
+
+            <label>
+              Cliente
+            </label>
+
+            <select
+              id="serviceClient"
+              required
+            >
+
+              <option value="">
+                Seleccionar cliente
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="form-field">
+
+            <label>
+              Servicio
+            </label>
+
+            <select
+              id="serviceType"
+              required
+            >
+
+              <option value="">
+                Seleccionar servicio
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="form-field full">
+
+            <label>
+              Descripción
+            </label>
+
+            <input
+              type="text"
+              id="serviceDescription"
+              placeholder="Descripción del servicio"
+            >
+
+          </div>
+
+
+          <div class="form-field">
+
+            <label>
+              Fecha de inicio
+            </label>
+
+            <input
+              type="date"
+              id="serviceStart"
+              required
+            >
+
+          </div>
+
+
+          <div class="form-field">
+
+            <label>
+              Fecha de fin
+            </label>
+
+            <input
+              type="date"
+              id="serviceEnd"
+              required
+            >
+
+          </div>
+
+
+          <div class="form-field">
+
+            <label>
+              Cantidad
+            </label>
+
+            <input
+              type="number"
+              id="serviceQuantity"
+              min="1"
+              value="1"
+            >
+
+          </div>
+
+
+          <div class="form-field">
+
+            <label>
+              Moneda
+            </label>
+
+            <select id="serviceCurrency">
+
+              <option value="USD">
+                USD — Dólares
+              </option>
+
+              <option value="PEN">
+                PEN — Soles
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="form-field">
+
+            <label>
+              Costo real
+            </label>
+
+            <input
+              type="number"
+              id="serviceCost"
+              step="0.01"
+              min="0"
+              placeholder="0.00"
+            >
+
+            <small>
+              Solo visible internamente.
+            </small>
+
+          </div>
+
+
+          <div class="form-field">
+
+            <label>
+              Precio al cliente
+            </label>
+
+            <input
+              type="number"
+              id="servicePrice"
+              step="0.01"
+              min="0"
+              placeholder="0.00"
+              required
+            >
+
+          </div>
+
+
+          <div class="form-field">
+
+            <label>
+              Estado del servicio
+            </label>
+
+            <select id="serviceStatus">
+
+              <option value="Activo">
+                Activo
+              </option>
+
+              <option value="Finalizado">
+                Finalizado
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="form-field">
+
+            <label>
+              Estado del pago
+            </label>
+
+            <select id="servicePayment">
+
+              <option value="Pendiente">
+                Pendiente
+              </option>
+
+              <option value="Pagado">
+                Pagado
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="form-field full">
+
+            <label>
+              Notas
+            </label>
+
+            <textarea
+              id="serviceNotes"
+              rows="3"
+              placeholder="Notas internas..."
+            ></textarea>
+
+          </div>
+
+        </div>
+
+
+        <div
+          id="serviceProfitPreview"
+          class="profit-preview"
+        >
+
+          <div>
+
+            <span>
+              Ganancia estimada
+            </span>
+
+            <strong id="previewProfit">
+              $0.00
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              Margen
+            </span>
+
+            <strong id="previewMargin">
+              0%
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div class="modal-actions">
+
+          <button
+            type="button"
+            class="secondary-button"
+            onclick="closeModal('serviceModal')"
+          >
+            Cancelar
+          </button>
+
+          <button
+            type="submit"
+            class="primary-button"
+          >
+            Guardar servicio
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================
+       TOAST
+  ========================== -->
+
+  <div
+    id="toast"
+    class="toast hidden"
+  >
+    <span id="toastMessage">
+      Guardado correctamente
+    </span>
+  </div>
+
+
+  <script src="app.js"></script>
+
+</body>
+</html>
