@@ -19,6 +19,7 @@ function doGet(e) {
     else if (action === 'contrataciones') result = getContratacionesUI();
     else if (action === 'pendientesCobro') result = getPendientesCobro(p.idCliente);
     else if (action === 'cobros') result = getCobros();
+    else if (action === 'cotizaciones') result = getCotizaciones();
     else throw new Error('Acción GET no reconocida: ' + action);
 
     return ContentService
@@ -58,6 +59,7 @@ function doPost(e) {
       case 'renovarContratacion': result = renovarContratacion(body.data || {}); break;
       case 'crearCobro': result = crearCobro(body.data || {}); break;
       case 'registrarPago': result = registrarPago(body.data || {}); break;
+      case 'guardarCotizacion': result = guardarCotizacion(body.data || {}); break;
       default: throw new Error('Acción POST no reconocida: ' + action);
     }
 

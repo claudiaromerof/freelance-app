@@ -37,16 +37,11 @@ function normalizeState(parsed) {
 }
 
 async function loadRealState() {
-  if (!apiConfigured()) return false;
-  try {
-    const remote = await apiGet();
-    state = normalizeState(remote);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    return true;
-  } catch (error) {
-    console.error("No se pudo cargar Google Sheets:", error);
-    return false;
-  }
+  if (!apiConfigured()) throw new Error("API no configurada");
+  const remote = await apiGet();
+  state = normalizeState(remote);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  return true;
 }
 
 function saveState() {

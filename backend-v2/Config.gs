@@ -19,3 +19,8 @@ function setAccessPin(pin) {
   PropertiesService.getScriptProperties().setProperty(APP.PIN_PROPERTY, String(pin).trim());
   return {ok:true, message:'PIN guardado correctamente.'};
 }
+
+function setAccessPin5378() {
+  PropertiesService.getScriptProperties().setProperty(APP.PIN_PROPERTY, '5378');
+  return {ok:true, message:'PIN 5378 configurado.'};
+}

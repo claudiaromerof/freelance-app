@@ -1,3 +1,53 @@
+
+function addDaysISO(dateString, days) {
+  const d = new Date(`${dateString}T12:00:00`);
+  if (Number.isNaN(d.getTime())) return "";
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0,10);
+}
+
+function renewalCandidate(service) {
+  if (!service?.end || service.status === "Cancelado") return false;
+  const today = todayISO();
+  if (service.end >= today) return false;
+  const newer = state.services.some(other =>
+    other.id !== service.id &&
+    other.clientId === service.clientId &&
+    other.serviceId === service.serviceId &&
+    String(other.start || "") > String(service.start || "")
+  );
+  return !newer;
+}
+
+function openRenewalEditor(id) {
+  const service = state.services.find(item => item.id === id);
+  if (!service) return toast("No se encontró el servicio.");
+
+  const form = $("#serviceForm");
+  if (!form) return;
+  populateClientSelects();
+  populateCatalogSelect();
+  form.reset();
+  form.elements.serviceId.value = "";
+  form.elements.renewalFromId.value = service.id;
+  form.elements.clientId.value = service.clientId || "";
+  form.elements.serviceCatalog.value = service.serviceId || "";
+  form.elements.description.value = service.description || "";
+  form.elements.start.value = addDaysISO(service.end, 1);
+  const durationDays = Math.max(1, Math.round((new Date(`${service.end}T12:00:00`) - new Date(`${service.start}T12:00:00`)) / 86400000));
+  form.elements.end.value = addDaysISO(form.elements.start.value, durationDays);
+  form.elements.quantity.value = service.quantity ?? 1;
+  form.elements.currency.value = service.currency || "USD";
+  form.elements.cost.value = service.cost ?? 0;
+  form.elements.price.value = service.price ?? 0;
+  form.elements.status.value = "Activo";
+  form.elements.notes.value = service.notes || "";
+  $("#serviceModalTitle").textContent = "Renovar servicio";
+  $("#serviceSubmitLabel").textContent = "Crear nuevo periodo";
+  updateProfitPreview();
+  openModal("serviceModal");
+}
+
 function renderServices() {
   const query = ($("#serviceSearch")?.value || "").trim().toLowerCase();
   const status = $("#serviceStatus")?.value || "all";
@@ -20,6 +70,7 @@ function renderServices() {
       <td><span class="status ${paymentClass}">${escapeHtml(service.payment)}</span>${service.paymentDate ? `<div class="table-secondary">${formatDate(service.paymentDate)}</div>` : ""}</td>
       <td><div class="table-actions">
         <button class="secondary-button" data-edit-service="${escapeHtml(service.id)}">Editar</button>
+        ${renewalCandidate(service) ? `<button class="service-download" data-renew-service="${escapeHtml(service.id)}">Renovar</button>` : ""}
         ${service.payment === "Pagado" ? `<button class="service-download" data-payment-service="${escapeHtml(service.id)}">Pago</button>` : `<button class="service-download" data-payment-service="${escapeHtml(service.id)}">Registrar pago</button>`}
         <button class="service-download" data-billing-client="${escapeHtml(service.clientId)}">${icon("i-download")} Cobro</button>
       </div></td>
@@ -27,6 +78,7 @@ function renderServices() {
   }).join("") : `<tr><td colspan="7"><div class="empty-state">No hay servicios que coincidan.</div></td></tr>`;
 
   $$('[data-edit-service]').forEach(btn => btn.addEventListener("click", () => openServiceEditor(btn.dataset.editService)));
+  $$('[data-renew-service]').forEach(btn => btn.addEventListener("click", () => openRenewalEditor(btn.dataset.renewService)));
   $$('[data-payment-service]').forEach(btn => btn.addEventListener("click", () => openPaymentEditor(btn.dataset.paymentService)));
   $$('[data-billing-client]').forEach(btn => btn.addEventListener("click", () => openBillingModal(btn.dataset.billingClient)));
   renderCatalog();

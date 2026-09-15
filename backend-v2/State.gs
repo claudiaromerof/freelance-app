@@ -3,6 +3,7 @@ function getState() {
     clients: getClientes(),
     serviceCatalog: getServicios(),
     contracts: getContrataciones(),
-    billing: getCobros()
+    billing: getCobros(),
+    quotes: getCotizaciones()
   };
 }

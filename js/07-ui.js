@@ -21,7 +21,7 @@ function resetClientForm() {
 }
 function resetServiceForm() {
   const form = $("#serviceForm"); if (!form) return;
-  form.reset(); form.elements.serviceId.value = ""; form.elements.quantity.value = 1; form.elements.status.value = "Activo"; form.elements.currency.value = "USD";
+  form.reset(); form.elements.serviceId.value = ""; if (form.elements.renewalFromId) form.elements.renewalFromId.value = ""; form.elements.quantity.value = 1; form.elements.status.value = "Activo"; form.elements.currency.value = "USD";
   populateCatalogSelect(); $("#serviceModalTitle").textContent = "Nuevo servicio"; $("#serviceSubmitLabel").textContent = "Guardar servicio"; updateProfitPreview();
 }
 function resetQuoteForm() {
@@ -73,12 +73,39 @@ $("#serviceForm")?.addEventListener('submit', async event => {
   const data = Object.fromEntries(new FormData(event.currentTarget).entries());
   if (!data.clientId || !data.serviceCatalog) return toast('Completa cliente y servicio.');
   if (!data.start || !data.end || data.end < data.start) return toast('Revisa el periodo del servicio.');
-  const id=data.serviceId?.trim(); const existing=id ? state.services.find(s=>s.id===id) : null; if (id && !existing) return toast('No se encontró el servicio.');
+  const id=data.serviceId?.trim();
+  const renewalFromId=data.renewalFromId?.trim();
+  const existing=id ? state.services.find(s=>s.id===id) : null;
+  const renewalSource=renewalFromId ? state.services.find(s=>s.id===renewalFromId) : null;
+  if (id && !existing) return toast('No se encontró el servicio.');
+  if (renewalFromId && !renewalSource) return toast('No se encontró el periodo anterior para renovar.');
   const catalog=getCatalogItem(data.serviceCatalog);
   const payload={ id:id||newId('CNT'), clientId:data.clientId, serviceId:catalog?.id || existing?.serviceId || data.serviceCatalog || '', service:(catalog?.name || existing?.service || 'Servicio'), provider:(catalog?.provider || existing?.provider || ''), description:data.description.trim() || catalog?.description || '', start:data.start,end:data.end,quantity:Number(data.quantity||1),cost:Number(data.cost||0),price:Number(data.price||0),currency:data.currency||'USD',documentType:existing?.documentType || currentSettings().documentType,retentionApplies:existing?.retentionApplies || 'Según corresponda',retentionRate:existing?.retentionRate || Number(currentSettings().retentionRate||8),retentionAmount:existing?.retentionAmount || 0,netReceived:existing?.netReceived || 0,status:data.status||'Activo',payment:existing?.payment||'Pendiente',paymentDate:existing?.paymentDate||'',paymentMethod:existing?.paymentMethod||'',rheEmitted:existing?.rheEmitted||'No',rheNumber:existing?.rheNumber||'',rheDate:existing?.rheDate||'',notes:data.notes.trim() };
-  const old=structuredClone(state); if(id){state.services[state.services.findIndex(s=>s.id===id)]=payload;}else state.services.unshift(payload);
-  try { await apiSaveContract(payload); } catch (error) { state=old; refreshAll(); return toast(error.message || 'No se pudo guardar la contratación.'); }
-  const ok=await persistAndRefresh(); if(!ok){state=old;refreshAll();return;} closeModal('serviceModal');showSection('services');toast(id?'Servicio actualizado correctamente.':'Servicio guardado correctamente.');
+  const old=structuredClone(state);
+  if(id){
+    state.services[state.services.findIndex(s=>s.id===id)]=payload;
+  }else if(!renewalFromId){
+    state.services.unshift(payload);
+  }
+
+  try {
+    if (renewalFromId) {
+      const renewed = await apiRenewContract(payload);
+      payload.id = renewed?.ID_CONTRATACION || newId('CNT');
+      state.services.unshift({ ...payload, id: payload.id, payment: 'Pendiente', status: 'Activo' });
+    } else {
+      await apiSaveContract(payload);
+    }
+  } catch (error) {
+    state=old; refreshAll(); return toast(error.message || 'No se pudo guardar la contratación.');
+  }
+
+  const ok=await persistAndRefresh();
+  if(!ok){state=old;refreshAll();return;}
+  closeModal('serviceModal');
+  showSection('services');
+  if (form.elements.renewalFromId) form.elements.renewalFromId.value = '';
+  toast(renewalFromId ? 'Nuevo periodo creado correctamente.' : (id?'Servicio actualizado correctamente.':'Servicio guardado correctamente.'));
 });
 
 $("#paymentForm")?.addEventListener('submit', async event=>{
@@ -99,6 +126,7 @@ $("#quoteForm")?.addEventListener('submit', async event=>{
   event.preventDefault(); const data=Object.fromEntries(new FormData(event.currentTarget).entries()); if(!data.clientId||!data.title?.trim())return toast('Completa cliente y propuesta.');
   const id=data.quoteId?.trim(); const old=structuredClone(state); const payload={id:id||newId('COT'),clientId:data.clientId,date:data.date,title:data.title.trim(),description:data.description.trim(),price:Number(data.price||0),currency:data.currency||'USD',validity:data.validity.trim()||'15 días',status:data.status||'Borrador',notes:data.notes.trim()};
   if(id){const i=state.quotes.findIndex(q=>q.id===id);if(i<0)return toast('No se encontró la cotización.');state.quotes[i]=payload;}else state.quotes.unshift(payload);
+  try { await apiSaveQuote(payload); } catch (error) { state=old; refreshAll(); return toast(error.message || 'No se pudo guardar la cotización.'); }
   const ok=await persistAndRefresh();if(!ok){state=old;refreshAll();return;}closeModal('quoteModal');showSection('quotes');toast(id?'Cotización actualizada correctamente.':'Cotización creada correctamente.');
 });
 

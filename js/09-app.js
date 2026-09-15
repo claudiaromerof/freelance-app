@@ -17,15 +17,10 @@ function showSection(sectionId) {
   });
 
   window.scrollTo({ top: 0, behavior: "smooth" });
-
-  const sidebar = $("#sidebar");
-  if (sidebar) sidebar.classList.remove("open");
+  $("#sidebar")?.classList.remove("open");
 }
 
-// Alias de compatibilidad para acciones antiguas.
-function showView(sectionId) {
-  showSection(sectionId);
-}
+function showView(sectionId) { showSection(sectionId); }
 
 $$('[data-section]').forEach(item => {
   item.addEventListener('click', () => showSection(item.dataset.section));
@@ -39,7 +34,6 @@ $$('[data-section-link]').forEach(item => {
   item.addEventListener('click', () => showSection(item.dataset.sectionLink));
 });
 
-
 function refreshAll() {
   renderDashboard();
   renderClients();
@@ -50,14 +44,45 @@ function refreshAll() {
   populateClientSelects();
 }
 
-refreshAll();
-  if (typeof populateSettingsForm === "function") populateSettingsForm();
-(async function initializeRealData(){
-  if (!getApiPin()) {
-    const pin = window.prompt('Acceso privado · escribe tu PIN:');
-    if (pin) setApiPin(pin);
+async function requireAccess() {
+  if (!apiConfigured()) {
+    alert("La aplicación no tiene configurada la API.");
+    return false;
   }
-  const connected = await loadRealState();
-  if (connected) { refreshAll(); if (typeof populateSettingsForm === "function") populateSettingsForm(); }
-})();
 
+  clearApiPin();
+
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    const pin = window.prompt(`Acceso privado\n\nEscribe tu PIN (${attempt}/3):`);
+    if (pin === null) return false;
+
+    setApiPin(pin);
+
+    try {
+      await loadRealState();
+      return true;
+    } catch (error) {
+      clearApiPin();
+      if (attempt < 3) {
+        alert("PIN incorrecto. Inténtalo nuevamente.");
+      } else {
+        alert("No se pudo acceder. Verifica tu PIN.");
+      }
+    }
+  }
+
+  return false;
+}
+
+(async function initializeRealData(){
+  const connected = await requireAccess();
+  if (!connected) {
+    // No mostramos datos demo ni datos guardados localmente si la autenticación falla.
+    state = normalizeState({clients:[], catalog:[], services:[], quotes:[], settings:{}});
+    refreshAll();
+    return;
+  }
+
+  refreshAll();
+  if (typeof populateSettingsForm === "function") populateSettingsForm();
+})();
