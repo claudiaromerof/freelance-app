@@ -1,113 +1,125 @@
 /* =========================================================
-   DOCUMENTOS — CLAUDIA R.
-   Sistema editorial A4
-   Identidad: CRF / Claudia R.
+   DOCUMENTOS — CRF
+   Diseño editorial A4 / versión comercial minimalista
    ========================================================= */
-
-
-/* =========================================================
-   UTILIDADES
-   ========================================================= */
-
-function updateProfitPreview() {
-  const form = $("#serviceForm");
-  if (!form) return;
-
-  const price = Number(form.elements.price?.value || 0);
-  const cost = Number(form.elements.cost?.value || 0);
-  const quantity = Number(form.elements.quantity?.value || 1);
-  const currency = form.elements.currency?.value || "USD";
-
-  if ($("#profitPreview")) {
-    $("#profitPreview").textContent =
-      money((price - cost) * quantity, currency);
-  }
-}
-
-
-["price", "cost", "quantity", "currency"].forEach(name => {
-  $("#serviceForm")?.elements[name]?.addEventListener(
-    "input",
-    updateProfitPreview
-  );
-
-  $("#serviceForm")?.elements[name]?.addEventListener(
-    "change",
-    updateProfitPreview
-  );
-});
-
 
 /* =========================================================
    DATOS PARA EL PAGO
    ========================================================= */
 
 function paymentDetailsHtml(currency) {
+
   const cfg = currentSettings();
 
   const isUSD = currency === "USD";
 
-  const bank = isUSD ? cfg.bankUSD : cfg.bankPEN;
-  const account = isUSD ? cfg.accountUSD : cfg.accountPEN;
-  const cci = isUSD ? cfg.cciUSD : cfg.cciPEN;
+  const bank =
+    isUSD
+      ? cfg.bankUSD
+      : cfg.bankPEN;
+
+  const account =
+    isUSD
+      ? cfg.accountUSD
+      : cfg.accountPEN;
+
+  const cci =
+    isUSD
+      ? cfg.cciUSD
+      : cfg.cciPEN;
 
   const rows = [];
 
+
   if (cfg.paymentHolder) {
+
     rows.push(`
-      <div class="payment-item">
+      <div>
         <span>Titular</span>
-        <strong>${escapeHtml(cfg.paymentHolder)}</strong>
+        <strong>
+          ${escapeHtml(cfg.paymentHolder)}
+        </strong>
       </div>
     `);
+
   }
+
 
   if (bank) {
+
     rows.push(`
-      <div class="payment-item">
+      <div>
         <span>Banco / plataforma</span>
-        <strong>${escapeHtml(bank)}</strong>
+        <strong>
+          ${escapeHtml(bank)}
+        </strong>
       </div>
     `);
+
   }
+
 
   if (account) {
+
     rows.push(`
-      <div class="payment-item">
+      <div>
         <span>Cuenta ${isUSD ? "USD" : "PEN"}</span>
-        <strong>${escapeHtml(account)}</strong>
+        <strong>
+          ${escapeHtml(account)}
+        </strong>
       </div>
     `);
+
   }
+
 
   if (cci) {
+
     rows.push(`
-      <div class="payment-item">
+      <div>
         <span>CCI</span>
-        <strong>${escapeHtml(cci)}</strong>
+        <strong>
+          ${escapeHtml(cci)}
+        </strong>
       </div>
     `);
+
   }
+
 
   if (cfg.mobilePayment) {
+
     rows.push(`
-      <div class="payment-item">
+      <div>
         <span>Yape / Plin</span>
-        <strong>${escapeHtml(cfg.mobilePayment)}</strong>
+        <strong>
+          ${escapeHtml(cfg.mobilePayment)}
+        </strong>
       </div>
     `);
+
   }
 
-  if (!rows.length) return "";
+
+  if (!rows.length) {
+    return "";
+  }
+
 
   return `
     <section class="payment-details">
-      <div class="section-kicker">Datos para el pago</div>
+
+      <div class="section-kicker">
+        DATOS PARA EL PAGO
+      </div>
+
       <div class="payment-grid">
         ${rows.join("")}
       </div>
+
     </section>
   `;
+
 }
 
 
@@ -116,185 +128,230 @@ function paymentDetailsHtml(currency) {
    ========================================================= */
 
 function printDocument(html, title) {
-  const win = window.open("", "_blank");
+
+  const win =
+    window.open(
+      "",
+      "_blank"
+    );
+
 
   if (!win) {
+
     toast(
-      "El navegador bloqueó la ventana. Permite ventanas emergentes para generar el PDF."
+      "El navegador bloqueó la ventana. Permite ventanas emergentes."
     );
+
     return;
+
   }
 
+
   win.document.open();
+
   win.document.write(html);
+
   win.document.close();
 
-  win.document.title = title;
+  win.document.title =
+    title;
 
-  setTimeout(() => {
-    try {
-      win.focus();
-      win.print();
-    } catch (_) {}
-  }, 450);
+
+  setTimeout(
+    () => {
+
+      try {
+
+        win.focus();
+
+        win.print();
+
+      } catch (_) {}
+
+    },
+    500
+  );
+
 }
 
 
 /* =========================================================
-   ESTILOS DEL DOCUMENTO
+   ESTILO EDITORIAL A4
    ========================================================= */
 
 function documentStyles() {
+
   return `
+
     <style>
 
-      /* -----------------------------------------------------
-         CONFIGURACIÓN GENERAL
-         ----------------------------------------------------- */
-
       @page {
+
         size: A4;
+
         margin: 0;
+
       }
+
 
       :root {
+
         --ink: #171717;
-        --text: #343330;
-        --muted: #77736c;
-        --line: #d8d4cc;
-        --line-dark: #252525;
+
+        --soft-ink: #41413e;
+
+        --muted: #777570;
+
+        --hairline: #d9d6cf;
+
         --paper: #fffefa;
-        --soft: #f5f3ee;
+
+        --warm: #f7f5f0;
+
+        --accent: #9b9488;
+
       }
 
+
       * {
+
         box-sizing: border-box;
+
       }
+
 
       html,
       body {
+
         margin: 0;
+
         padding: 0;
-        background: #e8e6e1;
+
+        background: #e9e7e2;
+
         color: var(--ink);
+
         font-family:
           Arial,
           Helvetica,
           sans-serif;
 
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
+        -webkit-print-color-adjust:
+          exact;
+
+        print-color-adjust:
+          exact;
+
       }
+
 
       body {
+
         min-width: 210mm;
+
       }
 
 
-      /* -----------------------------------------------------
-         HOJA A4
-         ----------------------------------------------------- */
-
       .page {
+
         position: relative;
 
         width: 210mm;
+
         min-height: 297mm;
 
         margin: 16px auto;
-        padding: 18mm 18mm 22mm;
+
+        padding:
+          17mm
+          18mm
+          19mm;
 
         background: var(--paper);
 
         box-shadow:
-          0 18px 55px rgba(0, 0, 0, .10);
+          0 16px 50px
+          rgba(0,0,0,.10);
 
         overflow: hidden;
+
+      }
+
+
+      .top-rule {
+
+        width: 100%;
+
+        height: 2px;
+
+        background: var(--ink);
+
+        margin-bottom: 18mm;
+
       }
 
 
       /* -----------------------------------------------------
-         MARCA
+         IDENTIDAD
          ----------------------------------------------------- */
 
       .brand-header {
+
         display: grid;
 
         grid-template-columns:
-          48px
-          minmax(0, 1fr)
-          auto;
+          58px
+          1fr;
+
+        gap: 16px;
 
         align-items: center;
 
-        gap: 15px;
-
-        padding-bottom: 12px;
+        padding-bottom: 13px;
 
         border-bottom:
-          1px solid var(--line);
+          1px solid
+          var(--hairline);
+
       }
 
+
       .monogram {
+
         font-family:
           Georgia,
           "Times New Roman",
           serif;
 
-        font-size: 24px;
+        font-size: 28px;
 
         line-height: 1;
 
         font-weight: 700;
 
-        letter-spacing: -2px;
+        letter-spacing: -2.2px;
 
         color: var(--ink);
+
+        padding-top: 1px;
+
       }
 
-      .brand-name {
-        font-family:
-          Georgia,
-          "Times New Roman",
-          serif;
 
-        font-size: 18px;
+      .brand-role-only {
 
-        line-height: 1;
+        color: var(--soft-ink);
 
-        font-weight: 500;
+        font-size: 8px;
 
-        letter-spacing: -.35px;
-      }
+        line-height: 1.45;
 
-      .brand-role {
-        margin-top: 5px;
-
-        color: var(--muted);
-
-        font-size: 6.8px;
-
-        line-height: 1.5;
-
-        letter-spacing: 1.25px;
-
-        text-transform: uppercase;
-      }
-
-      .brand-label {
-        color: var(--muted);
-
-        font-size: 6.5px;
-
-        line-height: 1.4;
-
-        letter-spacing: 1.7px;
+        letter-spacing: 1.35px;
 
         text-transform: uppercase;
 
-        text-align: right;
+        padding-top: 2px;
 
-        white-space: nowrap;
       }
 
 
@@ -303,169 +360,203 @@ function documentStyles() {
          ----------------------------------------------------- */
 
       .document-head {
+
         display: flex;
 
-        justify-content: space-between;
+        justify-content:
+          space-between;
 
-        align-items: flex-end;
+        gap: 24px;
 
-        gap: 25px;
+        align-items:
+          flex-end;
 
         padding:
-          15mm
+          17mm
           0
-          10mm;
+          11mm;
+
       }
 
+
       .document-type {
-        margin-bottom: 7px;
 
-        color: var(--muted);
-
-        font-size: 6.8px;
+        font-size: 7.5px;
 
         line-height: 1.4;
 
-        letter-spacing: 2px;
+        letter-spacing: 2.2px;
 
         text-transform: uppercase;
+
+        color: var(--muted);
+
+        margin-bottom: 9px;
+
       }
 
+
       .document-title {
+
         margin: 0;
 
-        max-width: 140mm;
+        max-width: 135mm;
 
         font-family:
           Georgia,
           "Times New Roman",
           serif;
 
-        font-size: 30px;
+        font-size: 31px;
 
-        line-height: 1.05;
+        line-height: 1.08;
 
         font-weight: 400;
 
-        letter-spacing: -.8px;
+        letter-spacing: -.65px;
+
       }
 
+
       .document-code {
-        min-width: 42mm;
+
+        min-width: 40mm;
+
+        text-align: right;
 
         color: var(--muted);
 
-        font-size: 6.8px;
+        font-size: 8px;
 
-        line-height: 1.5;
+        line-height: 1.55;
 
-        text-align: right;
       }
 
-      .document-code strong {
-        display: block;
 
-        margin-bottom: 2px;
+      .document-code strong {
+
+        display: block;
 
         color: var(--ink);
 
-        font-size: 7.5px;
+        font-size: 9px;
 
-        letter-spacing: 1px;
+        letter-spacing: .8px;
+
       }
 
 
       /* -----------------------------------------------------
-         DATOS CLIENTE
+         CLIENTE
          ----------------------------------------------------- */
 
       .client-grid {
+
         display: grid;
 
         grid-template-columns:
-          1.2fr
-          .8fr;
+          1.15fr
+          .85fr;
 
         border-top:
-          1px solid var(--line);
+          1px solid
+          var(--hairline);
 
         border-bottom:
-          1px solid var(--line);
+          1px solid
+          var(--hairline);
+
       }
+
 
       .client-cell {
-        min-height: 20mm;
 
         padding:
-          9px
+          11px
           0;
+
       }
 
+
       .client-cell + .client-cell {
+
         padding-left: 22px;
 
         border-left:
-          1px solid var(--line);
+          1px solid
+          var(--hairline);
+
       }
 
+
       .section-kicker {
-        margin-bottom: 5px;
 
         color: var(--muted);
 
-        font-size: 6.3px;
+        font-size: 7px;
 
         line-height: 1.4;
 
-        letter-spacing: 1.7px;
+        letter-spacing: 1.8px;
 
         text-transform: uppercase;
+
+        margin-bottom: 6px;
+
       }
 
+
       .client-name {
+
         font-family:
           Georgia,
           "Times New Roman",
           serif;
 
-        font-size: 14px;
+        font-size: 15px;
 
         line-height: 1.25;
+
       }
 
+
       .client-detail {
+
         margin-top: 3px;
 
-        color: var(--text);
+        color: var(--soft-ink);
 
-        font-size: 7.5px;
+        font-size: 8.5px;
 
-        line-height: 1.5;
+        line-height: 1.55;
+
       }
 
 
       /* -----------------------------------------------------
-         INTRODUCCIÓN
+         INTRO / CONCEPTO
          ----------------------------------------------------- */
 
       .intro {
-        max-width: 150mm;
 
         margin:
-          10mm
+          12mm
           0
           0;
 
-        color: var(--text);
+        max-width: 155mm;
+
+        color: var(--soft-ink);
 
         font-family:
           Georgia,
           "Times New Roman",
           serif;
 
-        font-size: 10px;
+        font-size: 11px;
 
         line-height: 1.65;
+
       }
 
 
@@ -474,182 +565,27 @@ function documentStyles() {
          ----------------------------------------------------- */
 
       .billing-period {
+
         margin-top: 9mm;
 
         padding:
-          9px
-          12px;
+          11px
+          13px;
 
         border-left:
-          2px solid var(--ink);
+          2px solid
+          var(--ink);
 
         background:
-          var(--soft);
+          var(--warm);
+
       }
+
 
       .billing-period strong {
+
         display: block;
 
-        margin-top: 3px;
-
-        font-family:
-          Georgia,
-          "Times New Roman",
-          serif;
-
-        font-size: 12px;
-
-        line-height: 1.3;
-
-        font-weight: 400;
-      }
-
-      .billing-period .small-note {
-        margin-top: 3px;
-
-        color: var(--muted);
-
-        font-size: 6.5px;
-
-        line-height: 1.4;
-      }
-
-
-      /* -----------------------------------------------------
-         TABLA
-         ----------------------------------------------------- */
-
-      .items {
-        width: 100%;
-
-        margin-top: 9mm;
-
-        border-collapse:
-          collapse;
-      }
-
-      .items thead th {
-        padding:
-          7px
-          6px;
-
-        border-top:
-          1px solid var(--line-dark);
-
-        border-bottom:
-          1px solid var(--line);
-
-        color: var(--muted);
-
-        font-size: 6.3px;
-
-        line-height: 1.3;
-
-        letter-spacing: 1.2px;
-
-        text-transform: uppercase;
-
-        text-align: left;
-      }
-
-      .items tbody td {
-        padding:
-          9px
-          6px;
-
-        border-bottom:
-          1px solid var(--line);
-
-        color: var(--text);
-
-        font-size: 7.5px;
-
-        line-height: 1.45;
-
-        vertical-align: top;
-      }
-
-      .items th:not(:first-child),
-      .items td:not(:first-child) {
-        text-align: right;
-      }
-
-      .item-title {
-        color: var(--ink);
-
-        font-size: 8px;
-
-        font-weight: 600;
-      }
-
-      .item-sub {
-        margin-top: 2px;
-
-        color: var(--muted);
-
-        font-size: 6.5px;
-      }
-
-
-      /* -----------------------------------------------------
-         TOTALES
-         ----------------------------------------------------- */
-
-      .total-area {
-        display: flex;
-
-        justify-content: flex-end;
-
-        margin-top: 9mm;
-      }
-
-      .total-box {
-        width: 73mm;
-
-        border-top:
-          1.5px solid var(--ink);
-
-        padding-top: 5px;
-      }
-
-      .total-row {
-        display: flex;
-
-        justify-content: space-between;
-
-        align-items: baseline;
-
-        gap: 20px;
-
-        padding:
-          3.5px
-          0;
-
-        color: var(--text);
-
-        font-size: 7.5px;
-      }
-
-      .total-row strong {
-        color: var(--ink);
-
-        font-weight: 600;
-      }
-
-      .total-row.grand {
-        margin-top: 3px;
-
-        padding-top: 7px;
-
-        border-top:
-          1px solid var(--line);
-
-        color: var(--ink);
-
-        font-size: 11px;
-      }
-
-      .total-row.grand strong {
         font-family:
           Georgia,
           "Times New Roman",
@@ -658,42 +594,323 @@ function documentStyles() {
         font-size: 15px;
 
         font-weight: 500;
+
+        line-height: 1.35;
+
       }
 
-      .tax-note {
-        margin-top: 6px;
+
+      .small-note {
+
+        margin-top: 4px;
 
         color: var(--muted);
 
-        font-size: 6.3px;
+        font-size: 7px;
 
         line-height: 1.5;
+
       }
 
 
       /* -----------------------------------------------------
-         NOTA
+         TABLA
          ----------------------------------------------------- */
 
-      .note {
-        margin-top: 7mm;
+      .items {
 
-        padding-top: 7px;
+        width: 100%;
 
-        border-top:
-          1px solid var(--line);
+        margin-top: 10mm;
 
-        color: var(--text);
+        border-collapse:
+          collapse;
 
-        font-size: 6.8px;
-
-        line-height: 1.6;
       }
 
-      .note strong {
+
+      .items thead th {
+
+        padding:
+          8px
+          7px;
+
+        border-top:
+          1px solid
+          var(--ink);
+
+        border-bottom:
+          1px solid
+          var(--hairline);
+
+        color: var(--muted);
+
+        font-size: 7px;
+
+        line-height: 1.3;
+
+        letter-spacing: 1.3px;
+
+        text-transform: uppercase;
+
+        text-align: left;
+
+      }
+
+
+      .items tbody td {
+
+        padding:
+          11px
+          7px;
+
+        border-bottom:
+          1px solid
+          var(--hairline);
+
+        color: var(--soft-ink);
+
+        font-size: 8.5px;
+
+        line-height: 1.45;
+
+        vertical-align:
+          top;
+
+      }
+
+
+      .items th:not(:first-child),
+      .items td:not(:first-child) {
+
+        text-align: right;
+
+      }
+
+
+      .item-title {
+
         color: var(--ink);
 
         font-weight: 700;
+
+        font-size: 9px;
+
+      }
+
+
+      .item-sub {
+
+        margin-top: 3px;
+
+        color: var(--muted);
+
+        font-size: 7.5px;
+
+      }
+
+
+      /* -----------------------------------------------------
+         TOTALES
+         ----------------------------------------------------- */
+
+      .total-area {
+
+        display: flex;
+
+        justify-content:
+          flex-end;
+
+        margin-top: 10mm;
+
+      }
+
+
+      .total-box {
+
+        width: 76mm;
+
+        border-top:
+          1.5px solid
+          var(--ink);
+
+        padding-top: 6px;
+
+      }
+
+
+      .total-row {
+
+        display: flex;
+
+        justify-content:
+          space-between;
+
+        gap: 20px;
+
+        padding:
+          4px
+          0;
+
+        color: var(--soft-ink);
+
+        font-size: 8.5px;
+
+      }
+
+
+      .total-row strong {
+
+        color: var(--ink);
+
+        font-weight: 600;
+
+      }
+
+
+      /* Total bruto — protagonista */
+
+      .total-row.gross {
+
+        padding:
+          3px
+          0
+          9px;
+
+        color: var(--ink);
+
+        font-size: 10px;
+
+      }
+
+
+      .total-row.gross strong {
+
+        font-family:
+          Georgia,
+          "Times New Roman",
+          serif;
+
+        font-size: 19px;
+
+        font-weight: 500;
+
+      }
+
+
+      /* Retención — nunca se presenta como descuento */
+
+      .total-row.retention {
+
+        padding:
+          8px
+          0;
+
+        border-top:
+          1px solid
+          var(--hairline);
+
+        color: var(--muted);
+
+      }
+
+
+      /* Neto */
+
+      .total-row.net {
+
+        margin-top: 2px;
+
+        padding-top: 9px;
+
+        border-top:
+          1px solid
+          var(--hairline);
+
+        color: var(--ink);
+
+        font-size: 9px;
+
+        font-weight: 700;
+
+      }
+
+
+      .total-row.net strong {
+
+        font-family:
+          Georgia,
+          "Times New Roman",
+          serif;
+
+        font-size: 15px;
+
+        font-weight: 600;
+
+      }
+
+
+      .tax-note {
+
+        margin-top: 7px;
+
+        color: var(--muted);
+
+        font-size: 7px;
+
+        line-height: 1.55;
+
+      }
+
+
+      /* -----------------------------------------------------
+         INFORMACIÓN
+         ----------------------------------------------------- */
+
+      .information-grid {
+
+        display: grid;
+
+        grid-template-columns:
+          1fr
+          1fr;
+
+        gap: 9mm;
+
+        margin-top: 12mm;
+
+      }
+
+
+      .information-block {
+
+        padding-top: 9px;
+
+        border-top:
+          1px solid
+          var(--hairline);
+
+      }
+
+
+      .information-block p,
+      .information-block ul {
+
+        margin: 0;
+
+        color: var(--soft-ink);
+
+        font-size: 8px;
+
+        line-height: 1.65;
+
+      }
+
+
+      .information-block ul {
+
+        padding-left: 14px;
+
       }
 
 
@@ -702,156 +919,164 @@ function documentStyles() {
          ----------------------------------------------------- */
 
       .payment-details {
-        margin-top: 8mm;
+
+        margin-top: 9mm;
 
         padding:
-          9px
-          11px;
-
-        border:
-          1px solid var(--line);
+          10px
+          12px;
 
         background:
-          var(--soft);
+          var(--warm);
+
+        border:
+          1px solid
+          var(--hairline);
+
       }
 
+
       .payment-grid {
+
         display: grid;
 
         grid-template-columns:
-          repeat(2, minmax(0, 1fr));
+          repeat(
+            2,
+            minmax(0,1fr)
+          );
 
         gap:
           8px
-          20px;
+          18px;
+
       }
 
-      .payment-item span {
+
+      .payment-grid span {
+
         display: block;
+
+        color: var(--muted);
+
+        font-size: 6.5px;
+
+        letter-spacing: 1px;
+
+        text-transform:
+          uppercase;
 
         margin-bottom: 2px;
 
-        color: var(--muted);
-
-        font-size: 6px;
-
-        line-height: 1.3;
-
-        letter-spacing: 1px;
-
-        text-transform: uppercase;
       }
 
-      .payment-item strong {
+
+      .payment-grid strong {
+
         color: var(--ink);
-
-        font-size: 7.2px;
-
-        line-height: 1.4;
-
-        font-weight: 600;
-      }
-
-
-      /* -----------------------------------------------------
-         FIRMA
-         ----------------------------------------------------- */
-
-      .signature {
-        margin-top: 14mm;
-
-        width: 62mm;
-      }
-
-      .signature-line {
-        width: 48mm;
-
-        margin-bottom: 6px;
-
-        border-top:
-          1px solid var(--ink);
-      }
-
-      .signature-name {
-        font-family:
-          Georgia,
-          "Times New Roman",
-          serif;
-
-        font-size: 9px;
-
-        line-height: 1.3;
-      }
-
-      .signature-role {
-        margin-top: 2px;
-
-        color: var(--muted);
-
-        font-size: 6.2px;
-
-        line-height: 1.5;
-      }
-
-
-      /* -----------------------------------------------------
-         PIE DE DOCUMENTO
-         ----------------------------------------------------- */
-
-      .footer {
-        position: absolute;
-
-        left: 18mm;
-        right: 18mm;
-        bottom: 9mm;
-
-        padding-top: 6px;
-
-        border-top:
-          1px solid var(--line);
-
-        display: flex;
-
-        justify-content: space-between;
-
-        align-items: center;
-      }
-
-      .footer-left {
-        color: var(--muted);
-
-        font-size: 6px;
-
-        line-height: 1.4;
-
-        letter-spacing: 1px;
-
-        text-transform: uppercase;
-      }
-
-      .footer-right {
-        color: var(--muted);
-
-        font-size: 6px;
-
-        line-height: 1.4;
-
-        text-align: right;
-      }
-
-      .footer-monogram {
-        color: var(--ink);
-
-        font-family:
-          Georgia,
-          "Times New Roman",
-          serif;
 
         font-size: 8px;
 
+        font-weight: 600;
+
+      }
+
+
+      /* -----------------------------------------------------
+         NOTA
+         ----------------------------------------------------- */
+
+      .note {
+
+        margin-top: 8mm;
+
+        padding:
+          10px
+          12px;
+
+        background:
+          var(--warm);
+
+        border-left:
+          2px solid
+          var(--accent);
+
+        color: var(--soft-ink);
+
+        font-size: 7.5px;
+
+        line-height: 1.65;
+
+      }
+
+
+      .note strong {
+
+        color: var(--ink);
+
+      }
+
+
+      /* -----------------------------------------------------
+         PIE
+         ----------------------------------------------------- */
+
+      .footer {
+
+        position: absolute;
+
+        left: 18mm;
+
+        right: 18mm;
+
+        bottom: 11mm;
+
+        padding-top: 8px;
+
+        border-top:
+          1px solid
+          var(--hairline);
+
+        display: flex;
+
+        justify-content:
+          space-between;
+
+        align-items: center;
+
+        gap: 20px;
+
+      }
+
+
+      .footer-crf {
+
+        font-family:
+          Georgia,
+          "Times New Roman",
+          serif;
+
+        font-size: 11px;
+
         font-weight: 700;
 
-        letter-spacing: -.5px;
+        letter-spacing: -.4px;
+
+      }
+
+
+      .footer-descriptor {
+
+        color: var(--muted);
+
+        font-size: 6.8px;
+
+        letter-spacing: 1px;
+
+        text-transform: uppercase;
+
+        text-align: right;
+
       }
 
 
@@ -863,100 +1088,137 @@ function documentStyles() {
 
         html,
         body {
-          background: #fff;
+
+          background:
+            #fff;
+
         }
 
-        body {
-          min-width: 0;
-        }
 
         .page {
-          width: 210mm;
-          min-height: 297mm;
 
           margin: 0;
 
           box-shadow: none;
+
         }
+
       }
 
 
       /* -----------------------------------------------------
-         PANTALLA
+         RESPONSIVE
          ----------------------------------------------------- */
 
-      @media screen and (max-width: 800px) {
+      @media(max-width:800px) {
 
         body {
+
           min-width: 0;
+
         }
 
+
         .page {
+
           width: 100%;
 
-          min-height: auto;
+          min-height: 100vh;
 
           margin: 0;
 
-          padding: 28px;
+          padding:
+            30px
+            25px
+            110px;
+
         }
+
+
+        .top-rule {
+
+          margin-bottom: 30px;
+
+        }
+
 
         .brand-header {
+
           grid-template-columns:
-            42px
+            52px
             1fr;
+
         }
 
-        .brand-label {
-          grid-column: 2;
-
-          text-align: left;
-        }
 
         .document-head {
-          display: block;
+
+          padding:
+            45px
+            0
+            30px;
+
         }
 
-        .document-code {
-          margin-top: 15px;
 
-          text-align: left;
+        .document-title {
+
+          font-size: 27px;
+
         }
+
 
         .client-grid {
-          grid-template-columns: 1fr;
+
+          grid-template-columns:
+            1fr;
+
         }
 
+
         .client-cell + .client-cell {
+
           padding-left: 0;
 
           border-left: 0;
 
           border-top:
-            1px solid var(--line);
+            1px solid
+            var(--hairline);
+
         }
+
+
+        .information-grid {
+
+          grid-template-columns:
+            1fr;
+
+        }
+
 
         .payment-grid {
-          grid-template-columns: 1fr;
+
+          grid-template-columns:
+            1fr;
+
         }
 
-        .total-area {
-          justify-content: stretch;
-        }
-
-        .total-box {
-          width: 100%;
-        }
 
         .footer {
-          position: static;
 
-          margin-top: 45px;
+          left: 25px;
+
+          right: 25px;
+
         }
+
       }
 
     </style>
+
   `;
+
 }
 
 
@@ -966,35 +1228,71 @@ function documentStyles() {
 
 function downloadQuote(id) {
 
-  const quote = state.quotes.find(q => q.id === id);
+  const quote =
+    state.quotes.find(
+      item =>
+        item.id === id
+    );
+
 
   if (!quote) {
-    return toast("No se encontró la cotización.");
+
+    return;
+
   }
 
+
   const client =
-    getClient(quote.clientId) || {};
+    getClient(
+      quote.clientId
+    );
 
-  const total =
-    Number(quote.price ?? quote.total ?? 0);
 
-  const number =
-    escapeHtml(quote.id || "");
+  const clientName =
+    escapeHtml(
+      client?.name ||
+      "Cliente"
+    );
+
 
   const title =
     escapeHtml(
       quote.title ||
-      "Propuesta comercial"
+      "Propuesta de servicios"
     );
+
 
   const description =
     escapeHtml(
       quote.description ||
-      "Servicio profesional."
+      "Servicios profesionales de comunicación, desarrollo web y estrategia digital."
     );
 
+
+  const total =
+    Number(
+      quote.price || 0
+    );
+
+
+  const currency =
+    quote.currency ||
+    "USD";
+
+
+  const number =
+    escapeHtml(
+      quote.id ||
+      ""
+    );
+
+
   const date =
-    formatDate(quote.date);
+    formatDate(
+      quote.date ||
+      todayISO()
+    );
+
 
   const validity =
     escapeHtml(
@@ -1002,18 +1300,9 @@ function downloadQuote(id) {
       "15 días"
     );
 
-  const clientName =
-    escapeHtml(
-      client.name ||
-      "Cliente"
-    );
-
-  const currency =
-    quote.currency ||
-    "USD";
-
 
   const html = `
+
     <!doctype html>
 
     <html lang="es">
@@ -1022,8 +1311,13 @@ function downloadQuote(id) {
 
         <meta charset="utf-8">
 
+        <meta
+          name="viewport"
+          content="width=device-width,initial-scale=1"
+        >
+
         <title>
-          ${title} — Claudia R.
+          Cotización ${number}
         </title>
 
         ${documentStyles()}
@@ -1036,7 +1330,8 @@ function downloadQuote(id) {
         <main class="page">
 
 
-          <!-- MARCA -->
+          <div class="top-rule"></div>
+
 
           <header class="brand-header">
 
@@ -1044,26 +1339,12 @@ function downloadQuote(id) {
               CRF
             </div>
 
-            <div>
-
-              <div class="brand-name">
-                Claudia R.
-              </div>
-
-              <div class="brand-role">
-                Comunicación · Desarrollo Web · Estrategia Digital
-              </div>
-
-            </div>
-
-            <div class="brand-label">
-              Marca personal
+            <div class="brand-role-only">
+              Comunicación · Desarrollo Web · Estrategia Digital
             </div>
 
           </header>
 
-
-          <!-- CABECERA -->
 
           <section class="document-head">
 
@@ -1093,9 +1374,8 @@ function downloadQuote(id) {
           </section>
 
 
-          <!-- CLIENTE -->
-
           <section class="client-grid">
+
 
             <div class="client-cell">
 
@@ -1108,10 +1388,12 @@ function downloadQuote(id) {
               </div>
 
               ${
-                client.document
+                client?.document
                   ? `
                     <div class="client-detail">
-                      ${escapeHtml(client.document)}
+                      ${escapeHtml(
+                        client.document
+                      )}
                     </div>
                   `
                   : ""
@@ -1130,56 +1412,62 @@ function downloadQuote(id) {
                 class="client-name"
                 style="
                   font-family:Arial,Helvetica,sans-serif;
-                  font-size:9px;
+                  font-size:10px;
                 "
               >
                 Recibo por Honorarios
               </div>
 
               <div class="client-detail">
+
                 Validez de la propuesta:
                 ${validity}
+
               </div>
 
             </div>
 
+
           </section>
 
-
-          <!-- DESCRIPCIÓN -->
 
           <p class="intro">
             ${description}
           </p>
 
 
-          <!-- TOTAL -->
-
           <div class="total-area">
 
             <div class="total-box">
 
-              <div class="total-row">
+
+              <div class="total-row gross">
 
                 <span>
-                  Honorarios profesionales
+                  TOTAL POR HONORARIOS
                 </span>
 
                 <strong>
-                  ${money(total, currency)}
+                  ${money(
+                    total,
+                    currency
+                  )}
                 </strong>
 
               </div>
 
 
-              <div class="total-row grand">
+              <div class="total-row net">
 
                 <span>
-                  Total
+                  TOTAL NETO RECIBIDO
                 </span>
 
                 <strong>
-                  ${money(total, currency)}
+                  ${money(
+                    total,
+                    currency
+                  )}
                 </strong>
 
               </div>
@@ -1188,26 +1476,26 @@ function downloadQuote(id) {
               <div class="tax-note">
 
                 La retención, cuando corresponda,
-                se gestiona al momento de emitir
+                se determina al momento de emitir
                 y pagar el Recibo por Honorarios.
-                No modifica el monto comercial
-                de esta propuesta.
+                No modifica el valor comercial
+                de esta cotización.
 
               </div>
+
 
             </div>
 
           </div>
 
 
-          <!-- INFORMACIÓN -->
-
           <section class="information-grid">
+
 
             <div class="information-block">
 
               <div class="section-kicker">
-                Consideraciones
+                Notas
               </div>
 
               <ul>
@@ -1231,49 +1519,37 @@ function downloadQuote(id) {
 
             </div>
 
+
+            <div class="information-block">
+
+              <div class="section-kicker">
+                Concepto
+              </div>
+
+              <p>
+
+                Servicios profesionales de
+                comunicación, desarrollo web
+                y estrategia digital, según
+                el alcance indicado en esta
+                propuesta.
+
+              </p>
+
+            </div>
+
+
           </section>
 
 
-          <!-- FIRMA -->
-
-          <div class="signature">
-
-            <div class="signature-line"></div>
-
-            <div class="signature-name">
-              Claudia Romero Fonseca
-            </div>
-
-            <div class="signature-role">
-              Comunicadora · Desarrolladora Web<br>
-              Estratega en Transformación Digital
-            </div>
-
-          </div>
-
-
-          <!-- PIE -->
-
           <footer class="footer">
 
-            <div class="footer-left">
-
-              <span class="footer-monogram">
-                CRF
-              </span>
-
-              &nbsp; · &nbsp;
-
-              Claudia R.
-
+            <div class="footer-crf">
+              CRF
             </div>
 
-
-            <div class="footer-right">
-
-              Comunicación · Desarrollo Web ·
-              Estrategia Digital
-
+            <div class="footer-descriptor">
+              Comunicación · Desarrollo Web · Estrategia Digital
             </div>
 
           </footer>
@@ -1284,13 +1560,15 @@ function downloadQuote(id) {
       </body>
 
     </html>
+
   `;
 
 
   printDocument(
     html,
-    `Cotización ${number} — Claudia R.`
+    `Cotización ${number} — CRF`
   );
+
 }
 
 
@@ -1304,22 +1582,36 @@ function downloadClientBilling(
 ) {
 
   const client =
-    getClient(clientId);
+    getClient(
+      clientId
+    );
+
 
   if (!client) {
+
     return toast(
       "No se encontró el cliente."
     );
+
   }
 
+
+  /*
+    Solo se cobran servicios
+    activos / pendientes.
+
+    Los finalizados y pagados
+    quedan fuera.
+  */
 
   const services =
     state.services
 
-      .filter(s =>
-        s.clientId === clientId &&
-        s.status !== "Finalizado" &&
-        s.payment !== "Pagado"
+      .filter(
+        service =>
+          service.clientId === clientId &&
+          service.status !== "Finalizado" &&
+          service.payment !== "Pagado"
       )
 
       .sort(
@@ -1343,13 +1635,15 @@ function downloadClientBilling(
     "USD";
 
 
-  if (
+  const mixedCurrency =
     services.some(
-      s =>
-        (s.currency || "USD") !==
+      service =>
+        (service.currency || "USD") !==
         currency
-    )
-  ) {
+    );
+
+
+  if (mixedCurrency) {
 
     return toast(
       "El cliente tiene servicios en monedas distintas. Revísalos antes de cobrar."
@@ -1360,11 +1654,23 @@ function downloadClientBilling(
 
   const baseTotal =
     services.reduce(
-      (sum, s) =>
-        sum + serviceTotal(s),
+      (sum, service) =>
+        sum +
+        serviceTotal(service),
       0
     );
 
+
+  /*
+    La retención se define
+    solamente en el momento
+    del cobro.
+
+    Si el modo es NETO:
+    el usuario indica cuánto
+    quiere recibir y se calcula
+    hacia arriba el honorario bruto.
+  */
 
   const applyRetention =
     billingOptions.applyRetention === true;
@@ -1380,11 +1686,17 @@ function downloadClientBilling(
 
   const gross =
     Number.isFinite(
-      Number(billingOptions.gross)
+      Number(
+        billingOptions.gross
+      )
     ) &&
-    Number(billingOptions.gross) > 0
+    Number(
+      billingOptions.gross
+    ) > 0
 
-      ? Number(billingOptions.gross)
+      ? Number(
+          billingOptions.gross
+        )
 
       : baseTotal;
 
@@ -1394,14 +1706,18 @@ function downloadClientBilling(
 
       ? (
           Number.isFinite(
-            Number(billingOptions.retained)
+            Number(
+              billingOptions.retained
+            )
           )
 
             ? Number(
                 billingOptions.retained
               )
 
-            : gross * rate / 100
+            : gross *
+              rate /
+              100
         )
 
       : 0;
@@ -1412,14 +1728,17 @@ function downloadClientBilling(
 
       ? (
           Number.isFinite(
-            Number(billingOptions.net)
+            Number(
+              billingOptions.net
+            )
           )
 
             ? Number(
                 billingOptions.net
               )
 
-            : gross - retained
+            : gross -
+              retained
         )
 
       : gross;
@@ -1427,13 +1746,15 @@ function downloadClientBilling(
 
   const periods =
     services.map(
-      s => `${s.start}|${s.end}`
+      service =>
+        `${service.start}|${service.end}`
     );
 
 
   const samePeriod =
     periods.every(
-      p => p === periods[0]
+      period =>
+        period === periods[0]
     );
 
 
@@ -1441,10 +1762,14 @@ function downloadClientBilling(
     samePeriod
 
       ? `
-        ${formatDate(services[0].start)}
-        – 
-        ${formatDate(services[0].end)}
-      `
+          ${formatDate(
+            services[0].start
+          )}
+          –
+          ${formatDate(
+            services[0].end
+          )}
+        `
 
       : "Periodos según cada servicio";
 
@@ -1454,64 +1779,88 @@ function downloadClientBilling(
 
 
   const rows =
-    services.map(s => `
+    services
 
-      <tr>
+      .map(
+        service => `
 
-        <td>
+          <tr>
 
-          <div class="item-title">
-            ${escapeHtml(
-              s.service ||
-              "Servicio"
-            )}
-          </div>
+            <td>
 
-          ${
-            s.description
-              ? `
-                <div class="item-sub">
-                  ${escapeHtml(
-                    s.description
-                  )}
-                </div>
-              `
-              : ""
-          }
+              <div class="item-title">
 
-        </td>
+                ${escapeHtml(
+                  service.service ||
+                  "Servicio"
+                )}
 
+              </div>
 
-        <td>
-          ${formatDate(s.start)}
-          –
-          ${formatDate(s.end)}
-        </td>
+              ${
+                service.description
+                  ? `
+                    <div class="item-sub">
 
+                      ${escapeHtml(
+                        service.description
+                      )}
 
-        <td>
-          ${s.quantity || 1}
-        </td>
+                    </div>
+                  `
+                  : ""
+              }
+
+            </td>
 
 
-        <td>
-          ${money(
-            s.price,
-            s.currency
-          )}
-        </td>
+            <td>
+
+              ${formatDate(
+                service.start
+              )}
+
+              –
+
+              ${formatDate(
+                service.end
+              )}
+
+            </td>
 
 
-        <td>
-          ${money(
-            serviceTotal(s),
-            s.currency
-          )}
-        </td>
+            <td>
 
-      </tr>
+              ${service.quantity || 1}
 
-    `).join("");
+            </td>
+
+
+            <td>
+
+              ${money(
+                service.price,
+                service.currency
+              )}
+
+            </td>
+
+
+            <td>
+
+              ${money(
+                serviceTotal(service),
+                service.currency
+              )}
+
+            </td>
+
+          </tr>
+
+        `
+      )
+
+      .join("");
 
 
   const html = `
@@ -1524,8 +1873,17 @@ function downloadClientBilling(
 
         <meta charset="utf-8">
 
+        <meta
+          name="viewport"
+          content="width=device-width,initial-scale=1"
+        >
+
         <title>
-          ${billingId} — Claudia R.
+          ${billingId}
+          —
+          ${escapeHtml(
+            client.name
+          )}
         </title>
 
         ${documentStyles()}
@@ -1538,7 +1896,8 @@ function downloadClientBilling(
         <main class="page">
 
 
-          <!-- MARCA -->
+          <div class="top-rule"></div>
+
 
           <header class="brand-header">
 
@@ -1546,28 +1905,12 @@ function downloadClientBilling(
               CRF
             </div>
 
-
-            <div>
-
-              <div class="brand-name">
-                Claudia R.
-              </div>
-
-              <div class="brand-role">
-                Comunicación · Desarrollo Web · Estrategia Digital
-              </div>
-
-            </div>
-
-
-            <div class="brand-label">
-              Marca personal
+            <div class="brand-role-only">
+              Comunicación · Desarrollo Web · Estrategia Digital
             </div>
 
           </header>
 
-
-          <!-- CABECERA -->
 
           <section class="document-head">
 
@@ -1590,16 +1933,17 @@ function downloadClientBilling(
                 ${billingId}
               </strong>
 
-              ${formatDate(todayISO())}
+              ${formatDate(
+                todayISO()
+              )}
 
             </div>
 
           </section>
 
 
-          <!-- CLIENTE -->
-
           <section class="client-grid">
+
 
             <div class="client-cell">
 
@@ -1608,22 +1952,28 @@ function downloadClientBilling(
               </div>
 
               <div class="client-name">
+
                 ${escapeHtml(
                   client.name ||
                   "Cliente"
                 )}
+
               </div>
 
 
               ${
                 client.document
+
                   ? `
                     <div class="client-detail">
+
                       ${escapeHtml(
                         client.document
                       )}
+
                     </div>
                   `
+
                   : ""
               }
 
@@ -1640,7 +1990,7 @@ function downloadClientBilling(
                 class="client-name"
                 style="
                   font-family:Arial,Helvetica,sans-serif;
-                  font-size:9px;
+                  font-size:10px;
                 "
               >
                 Recibo por Honorarios
@@ -1648,20 +1998,16 @@ function downloadClientBilling(
 
               <div class="client-detail">
 
-                ${
-                  applyRetention
-                    ? `Retención aplicada: ${rate}%`
-                    : "Sin retención aplicada"
-                }
+                La retención, cuando corresponda,
+                se aplica al Recibo por Honorarios.
 
               </div>
 
             </div>
 
+
           </section>
 
-
-          <!-- PERIODO -->
 
           <section class="billing-period">
 
@@ -1683,32 +2029,31 @@ function downloadClientBilling(
           </section>
 
 
-          <!-- SERVICIOS -->
-
           <table class="items">
+
 
             <thead>
 
               <tr>
 
                 <th>
-                  Servicio
+                  SERVICIO
                 </th>
 
                 <th>
-                  Periodo
+                  PERIODO
                 </th>
 
                 <th>
-                  Cant.
+                  CANT.
                 </th>
 
                 <th>
-                  Precio
+                  PRECIO
                 </th>
 
                 <th>
-                  Total
+                  TOTAL
                 </th>
 
               </tr>
@@ -1722,27 +2067,32 @@ function downloadClientBilling(
 
             </tbody>
 
+
           </table>
 
 
-          <!-- TOTALES -->
+          <!-- ================================================
+               TOTALES TIPO RHE
+               ================================================ -->
 
           <div class="total-area">
 
             <div class="total-box">
 
 
-              <div class="total-row">
+              <div class="total-row gross">
 
                 <span>
-                  Honorarios
+                  TOTAL POR HONORARIOS
                 </span>
 
                 <strong>
+
                   ${money(
                     gross,
                     currency
                   )}
+
                 </strong>
 
               </div>
@@ -1753,17 +2103,19 @@ function downloadClientBilling(
 
                   ? `
 
-                    <div class="total-row">
+                    <div class="total-row retention">
 
                       <span>
-                        Retención RHE (${rate}%)
+                        Retención (${rate} %) IR
                       </span>
 
                       <strong>
-                        − ${money(
+
+                        ${money(
                           retained,
                           currency
                         )}
+
                       </strong>
 
                     </div>
@@ -1774,16 +2126,10 @@ function downloadClientBilling(
               }
 
 
-              <div class="total-row grand">
+              <div class="total-row net">
 
                 <span>
-
-                  ${
-                    applyRetention
-                      ? "Neto a pagar"
-                      : "Total a pagar"
-                  }
-
+                  TOTAL NETO RECIBIDO
                 </span>
 
                 <strong>
@@ -1797,12 +2143,37 @@ function downloadClientBilling(
 
               </div>
 
+
+              <div class="tax-note">
+
+                ${
+                  applyRetention
+
+                    ? `
+
+                      La retención corresponde al
+                      ${rate}% del importe total de
+                      los honorarios cuando corresponde.
+                      No constituye un descuento comercial.
+
+                    `
+
+                    : `
+
+                      Importe total de honorarios
+                      correspondiente a los servicios
+                      detallados.
+
+                    `
+                }
+
+              </div>
+
+
             </div>
 
           </div>
 
-
-          <!-- CONDICIÓN -->
 
           <div class="note">
 
@@ -1810,22 +2181,18 @@ function downloadClientBilling(
               Condición de pago.
             </strong>
 
-            El pago corresponde a los
-            servicios detallados y a los
-            periodos indicados.
+            El pago corresponde a los servicios
+            detallados y a los periodos indicados.
 
             ${
               applyRetention
 
                 ? `
-                  Se considera una retención
-                  de Recibo por Honorarios
-                  del ${rate}%, por lo que el
-                  neto a pagar indicado es
-                  ${money(
-                    net,
-                    currency
-                  )}.
+
+                  El Recibo por Honorarios considera
+                  una retención de ${rate}% del
+                  Impuesto a la Renta.
+
                 `
 
                 : ""
@@ -1834,51 +2201,19 @@ function downloadClientBilling(
           </div>
 
 
-          <!-- DATOS DE PAGO -->
+          ${paymentDetailsHtml(
+            currency
+          )}
 
-          ${paymentDetailsHtml(currency)}
-
-
-          <!-- FIRMA -->
-
-          <div class="signature">
-
-            <div class="signature-line"></div>
-
-            <div class="signature-name">
-              Claudia Romero Fonseca
-            </div>
-
-            <div class="signature-role">
-              Comunicadora · Desarrolladora Web<br>
-              Estratega en Transformación Digital
-            </div>
-
-          </div>
-
-
-          <!-- PIE -->
 
           <footer class="footer">
 
-            <div class="footer-left">
-
-              <span class="footer-monogram">
-                CRF
-              </span>
-
-              &nbsp; · &nbsp;
-
-              Claudia R.
-
+            <div class="footer-crf">
+              CRF
             </div>
 
-
-            <div class="footer-right">
-
-              Comunicación · Desarrollo Web ·
-              Estrategia Digital
-
+            <div class="footer-descriptor">
+              Comunicación · Desarrollo Web · Estrategia Digital
             </div>
 
           </footer>
@@ -1895,6 +2230,7 @@ function downloadClientBilling(
 
   printDocument(
     html,
-    `${billingId} — Claudia R.`
+    `${billingId} — ${client.name}`
   );
+
 }
