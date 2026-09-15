@@ -4,16 +4,31 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#171b19">
-  <title>Claudia Romero Fonseca — Comunicación · Desarrollo Web · Estrategia Digital</title>
+  <title>Claudia Romero Fonseca — App de Gestión Pro</title>
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
+  
   <link rel="stylesheet" href="styles.css">
+  
+  <!-- Carga asíncrona para mayor velocidad -->
+  <script src="js/00-config.js" defer></script>
+  <script src="js/00-api.js" defer></script>
+  <script src="js/01-core.js" defer></script>
+  <script src="js/02-dashboard.js" defer></script>
+  <script src="js/03-clients.js" defer></script>
+  <script src="js/04-services.js" defer></script>
+  <script src="js/05-quotes.js" defer></script>
+  <script src="js/06-finance.js" defer></script>
+  <script src="js/07-ui.js" defer></script>
+  <script src="js/08-documents.js" defer></script>
+  <script src="js/09-app.js" defer></script>
 </head>
 <body>
 
   <!-- SVG ICONS -->
-  <svg class="svg-sprite" aria-hidden="true">
+  <svg class="svg-sprite" aria-hidden="true" style="display:none;">
     <symbol id="i-home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7"/><path d="M5 9.5V21h14V9.5"/><path d="M9 21v-6h6v6"/></symbol>
     <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3.5 20c.6-3.4 2.4-5 5.5-5s4.9 1.6 5.5 5"/><path d="M16 5.5a3 3 0 0 1 0 5.8"/><path d="M16.5 15c2.2.2 3.6 1.7 4 4"/></symbol>
     <symbol id="i-briefcase" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5h8v2M3 12h18M10 12v2h4v-2"/></symbol>
@@ -31,19 +46,15 @@
     <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
     <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
     <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></symbol>
-    <symbol id="i-edit" viewBox="0 0 24 24"><path d="m4 16-.8 4.8L8 20l11-11-4-4zM13 6l4 4"/></symbol>
-    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
   </svg>
 
   <div class="app-shell">
-
     <aside class="sidebar" id="sidebar">
       <div class="brand">
         <div class="brand-mark">CRF</div>
         <div class="brand-name">Claudia R.</div>
         <div class="brand-caption">COMUNICACIÓN · DESARROLLO WEB · ESTRATEGIA DIGITAL</div>
       </div>
-
       <nav class="main-nav" aria-label="Navegación principal">
         <button class="nav-item active" data-section="dashboard"><svg><use href="#i-home"/></svg><span>Inicio</span></button>
         <button class="nav-item" data-section="clients"><svg><use href="#i-users"/></svg><span>Clientes</span></button>
@@ -54,128 +65,92 @@
         <button class="nav-item" data-section="documents"><svg><use href="#i-folder"/></svg><span>Documentos</span></button>
         <button class="nav-item" data-section="settings"><svg><use href="#i-settings"/></svg><span>Configuración</span></button>
       </nav>
-
       <div class="sidebar-footer">
         <div class="footer-rule"></div>
-        <div class="footer-note">COMUNICACIÓN<br>DESARROLLO WEB<br>ESTRATEGIA DIGITAL</div>
         <div class="account">
           <div class="avatar light">CRF</div>
-          <div><strong>Claudia R.</strong><small>Marca personal</small></div>
-          <svg class="chevron"><use href="#i-arrow"/></svg>
+          <div><strong>Claudia R.</strong><small>Admin</small></div>
         </div>
       </div>
     </aside>
 
     <main class="main-content">
-
       <header class="topbar">
         <button class="mobile-menu" id="mobileMenu" aria-label="Abrir menú"><svg><use href="#i-menu"/></svg></button>
         <div class="search-box">
           <svg><use href="#i-search"/></svg>
-          <input id="globalSearch" type="search" placeholder="Buscar cliente, servicio o documento..." autocomplete="off">
+          <input id="globalSearch" type="search" placeholder="Buscar en la plataforma..." autocomplete="off">
         </div>
-        <button class="icon-button" aria-label="Notificaciones"><svg><use href="#i-bell"/></svg><span class="notification-dot"></span></button>
+        <button class="icon-button hover-effect"><svg><use href="#i-bell"/></svg><span class="notification-dot"></span></button>
         <div class="avatar dark">CR</div>
       </header>
 
       <!-- DASHBOARD -->
       <section class="page-section active" id="dashboard">
         <div class="page-heading">
-          <div>
-            <div class="eyebrow">INICIO</div>
-            <h1>Hola, Claudia</h1>
-            <p id="todayLabel"></p>
-          </div>
-          <button class="primary-button" data-action="new-quote"><svg><use href="#i-plus"/></svg>Nueva cotización</button>
+          <div><div class="eyebrow">INICIO</div><h1>Hola, Claudia</h1><p id="todayLabel"></p></div>
+          <button class="primary-button hover-effect" data-action="new-quote"><svg><use href="#i-plus"/></svg>Nueva cotización</button>
         </div>
-
         <div class="metrics-grid">
-          <article class="metric-card">
-            <div class="metric-icon"><svg><use href="#i-users"/></svg></div>
-            <div><span>Clientes</span><strong id="metricClients">0</strong><small id="metricClientsSub"></small></div>
-          </article>
-          <article class="metric-card">
-            <div class="metric-icon"><svg><use href="#i-file"/></svg></div>
-            <div><span>Cotizaciones</span><strong id="metricQuotes">0</strong><small id="metricQuotesSub"></small></div>
-          </article>
-          <article class="metric-card">
-            <div class="metric-icon"><svg><use href="#i-dollar"/></svg></div>
-            <div><span>Ingresos (mes)</span><strong id="metricIncome">$0</strong><small id="metricIncomeSub"></small></div>
-          </article>
-          <article class="metric-card">
-            <div class="metric-icon"><svg><use href="#i-chart"/></svg></div>
-            <div><span>Proyectos activos</span><strong id="metricActive">0</strong><small id="metricActiveSub"></small></div>
-          </article>
+          <article class="metric-card"><div class="metric-icon"><svg><use href="#i-users"/></svg></div><div><span>Clientes</span><strong id="metricClients">0</strong></div></article>
+          <article class="metric-card"><div class="metric-icon"><svg><use href="#i-file"/></svg></div><div><span>Cotizaciones</span><strong id="metricQuotes">0</strong></div></article>
+          <article class="metric-card"><div class="metric-icon"><svg><use href="#i-dollar"/></svg></div><div><span>Ingresos (mes)</span><strong id="metricIncome">$0</strong></div></article>
+          <article class="metric-card"><div class="metric-icon"><svg><use href="#i-chart"/></svg></div><div><span>Proyectos activos</span><strong id="metricActive">0</strong></div></article>
         </div>
-
         <div class="dashboard-grid">
-          <article class="panel income-panel">
-            <div class="panel-header">
-              <div><h2>Ingresos</h2><p>Últimos 6 meses</p></div>
-              <span class="panel-period">Resumen</span>
-            </div>
-            <div class="chart-wrap" id="incomeChart"></div>
-          </article>
-
-          <article class="panel activities-panel">
-            <div class="panel-header"><h2>Próximas actividades</h2><button class="text-button" data-section-link="services">Ver todas</button></div>
-            <div id="upcomingActivities" class="activity-list"></div>
-          </article>
-
-          <article class="panel recent-panel">
-            <div class="panel-header"><h2>Clientes recientes</h2><button class="text-button" data-section-link="clients">Ver todos</button></div>
-            <div id="recentClients" class="recent-list"></div>
-          </article>
-
-          <article class="panel quick-panel">
-            <div class="panel-header"><h2>Accesos rápidos</h2></div>
+          <article class="panel income-panel"><div class="panel-header"><div><h2>Ingresos</h2><p>Últimos 6 meses</p></div></div><div class="chart-wrap" id="incomeChart"></div></article>
+          <article class="panel activities-panel"><div class="panel-header"><h2>Actividades</h2><button class="text-button" data-section-link="services">Ver todas</button></div><div id="upcomingActivities" class="activity-list"></div></article>
+          <article class="panel recent-panel"><div class="panel-header"><h2>Clientes recientes</h2><button class="text-button" data-section-link="clients">Ver todos</button></div><div id="recentClients" class="recent-list"></div></article>
+          <article class="panel quick-panel"><div class="panel-header"><h2>Accesos rápidos</h2></div>
             <div class="quick-grid">
-              <button class="quick-card" data-action="new-quote"><svg><use href="#i-file"/></svg><span>Nueva<br>cotización</span></button>
-              <button class="quick-card" data-action="new-client"><svg><use href="#i-users"/></svg><span>Agregar<br>cliente</span></button>
-              <button class="quick-card" data-action="new-service"><svg><use href="#i-grid"/></svg><span>Gestionar<br>servicios</span></button>
-              <button class="quick-card" data-section-link="finance"><svg><use href="#i-chart"/></svg><span>Ver<br>finanzas</span></button>
+              <button class="quick-card hover-effect" data-action="new-quote"><svg><use href="#i-file"/></svg><span>Cotización</span></button>
+              <button class="quick-card hover-effect" data-action="new-client"><svg><use href="#i-users"/></svg><span>Cliente</span></button>
+              <button class="quick-card hover-effect" data-action="new-service"><svg><use href="#i-grid"/></svg><span>Servicio</span></button>
+              <button class="quick-card hover-effect" data-section-link="finance"><svg><use href="#i-chart"/></svg><span>Finanzas</span></button>
             </div>
           </article>
         </div>
-
-        <div class="signature-strip"><span></span><em>Claudia R.</em></div>
       </section>
 
-      <!-- CLIENTS -->
+      <!-- CLIENTES -->
       <section class="page-section" id="clients">
         <div class="page-heading compact">
-          <div><div class="eyebrow">GESTIÓN</div><h1>Clientes</h1><p>Administra tus clientes y su información.</p></div>
-          <button class="primary-button" data-action="new-client"><svg><use href="#i-plus"/></svg>Nuevo cliente</button>
+          <div><div class="eyebrow">GESTIÓN</div><h1>Clientes</h1></div>
+          <button class="primary-button hover-effect" data-action="new-client"><svg><use href="#i-plus"/></svg>Nuevo cliente</button>
         </div>
         <div class="toolbar"><div class="table-search"><svg><use href="#i-search"/></svg><input id="clientSearch" placeholder="Buscar cliente..."></div><span id="clientCount" class="result-count"></span></div>
         <div class="table-panel"><table><thead><tr><th>Cliente</th><th>Contacto</th><th>Servicios</th><th>Último servicio</th><th></th></tr></thead><tbody id="clientsTable"></tbody></table></div>
       </section>
 
-      <!-- SERVICES -->
+      <!-- SERVICIOS -->
       <section class="page-section" id="services">
         <div class="page-heading compact">
-          <div><div class="eyebrow">GESTIÓN</div><h1>Servicios</h1><p>Contrataciones, periodos, pagos, costos y rentabilidad.</p></div>
-          <div class="heading-actions"><button class="secondary-button" data-action="new-catalog"><svg><use href="#i-grid"/></svg>Catálogo</button><button class="primary-button" data-action="new-service"><svg><use href="#i-plus"/></svg>Nuevo servicio</button></div>
+          <div><div class="eyebrow">GESTIÓN</div><h1>Servicios</h1></div>
+          <div class="heading-actions">
+            <button class="secondary-button hover-effect" data-action="new-catalog"><svg><use href="#i-grid"/></svg>Catálogo</button>
+            <button class="primary-button hover-effect" data-action="new-service"><svg><use href="#i-plus"/></svg>Nuevo servicio</button>
+          </div>
         </div>
-        <div class="toolbar"><div class="table-search"><svg><use href="#i-search"/></svg><input id="serviceSearch" placeholder="Buscar servicio o cliente..."></div><select id="serviceStatus"><option value="all">Todos los estados</option><option value="Activo">Activos</option><option value="Pendiente">Pendientes</option><option value="Finalizado">Finalizados</option></select></div>
+        <div class="toolbar">
+          <div class="table-search"><svg><use href="#i-search"/></svg><input id="serviceSearch" placeholder="Buscar servicio..."></div>
+          <select id="serviceStatus"><option value="all">Todos los estados</option><option value="Activo">Activos</option><option value="Pendiente">Pendientes</option><option value="Finalizado">Finalizados</option></select>
+        </div>
         <div class="table-panel"><table><thead><tr><th>Servicio</th><th>Cliente</th><th>Periodo</th><th>Precio</th><th>Estado</th><th>Pago</th><th></th></tr></thead><tbody id="servicesTable"></tbody></table></div>
-        <div class="panel catalog-panel"><div class="panel-header"><div><h2>Catálogo de servicios</h2><p>Administra los servicios base sin entrar a Google Sheets.</p></div><button class="secondary-button" data-action="new-catalog"><svg><use href="#i-plus"/></svg>Nuevo</button></div><div class="table-panel inner"><table><thead><tr><th>Servicio</th><th>Periodicidad</th><th>Moneda</th><th>Estado</th><th></th></tr></thead><tbody id="catalogTable"></tbody></table></div></div>
+        <div class="panel catalog-panel" style="margin-top:20px; display:none;"><div class="panel-header"><div><h2>Catálogo de servicios</h2></div><button class="secondary-button" data-action="new-catalog"><svg><use href="#i-plus"/></svg>Nuevo</button></div><div class="table-panel inner"><table><thead><tr><th>Servicio</th><th>Periodicidad</th><th>Moneda</th><th>Estado</th><th></th></tr></thead><tbody id="catalogTable"></tbody></table></div></div>
       </section>
 
-      <!-- QUOTES -->
+      <!-- COTIZACIONES -->
       <section class="page-section" id="quotes">
         <div class="page-heading compact">
-          <div><div class="eyebrow">DOCUMENTOS</div><h1>Cotizaciones</h1><p>Crea cotizaciones y genera resúmenes de cobro por periodo.</p></div>
-          <button class="primary-button" data-action="new-quote"><svg><use href="#i-plus"/></svg>Nueva cotización</button>
+          <div><div class="eyebrow">DOCUMENTOS</div><h1>Cotizaciones</h1></div>
+          <button class="primary-button hover-effect" data-action="new-quote"><svg><use href="#i-plus"/></svg>Nueva cotización</button>
         </div>
         <div class="empty-or-list" id="quotesList"></div>
       </section>
 
-      <!-- FINANCE -->
+      <!-- FINANZAS -->
       <section class="page-section" id="finance">
-        <div class="page-heading compact">
-          <div><div class="eyebrow">CONTROL</div><h1>Finanzas</h1><p>Vista interna de ingresos, costos y rentabilidad.</p></div>
-        </div>
+        <div class="page-heading compact"><div><div class="eyebrow">CONTROL</div><h1>Finanzas</h1></div></div>
         <div class="finance-cards">
           <article class="finance-card"><span>Ventas contratadas</span><strong id="financeSales">$0</strong></article>
           <article class="finance-card"><span>Costos reales</span><strong id="financeCosts">$0</strong></article>
@@ -184,206 +159,133 @@
           <article class="finance-card"><span>Cobrado</span><strong id="financeCollected">$0</strong></article>
           <article class="finance-card"><span>Pendiente de cobro</span><strong id="financePending">$0</strong></article>
         </div>
-        <div class="panel finance-note"><h2>Control interno</h2><p>Los costos de plataformas y la ganancia son información interna. Nunca se muestran en la cotización o resumen que recibe el cliente.</p></div>
       </section>
 
-      <!-- HISTORY -->
+      <!-- HISTORIAL & DOCS & SETTINGS -->
       <section class="page-section" id="history">
-        <div class="page-heading compact"><div><div class="eyebrow">REGISTRO</div><h1>Historial</h1><p>Conserva los precios y servicios de cada periodo.</p></div></div>
+        <div class="page-heading compact"><div><div class="eyebrow">REGISTRO</div><h1>Historial</h1></div></div>
         <div class="table-panel"><table><thead><tr><th>Cliente</th><th>Servicio</th><th>Periodo</th><th>Precio</th><th>Estado</th></tr></thead><tbody id="historyTable"></tbody></table></div>
       </section>
-
-      <!-- DOCUMENTS -->
       <section class="page-section" id="documents">
-        <div class="page-heading compact"><div><div class="eyebrow">ARCHIVO</div><h1>Documentos</h1><p>Documentos generados desde esta aplicación.</p></div></div>
-        <div class="document-info panel">
-          <svg><use href="#i-folder"/></svg>
-          <h2>Documentos para tus clientes</h2>
-          <p>Las cotizaciones y resúmenes de cobro se generan desde los registros de cada cliente. El costo interno, la ganancia y los datos tributarios permanecen fuera del documento.</p>
-          <button class="primary-button document-action" data-section-link="clients">Ir a clientes y generar cobro</button>
-        </div>
+        <div class="page-heading compact"><div><div class="eyebrow">ARCHIVO</div><h1>Documentos</h1></div></div>
+        <div class="document-info panel"><svg><use href="#i-folder"/></svg><h2>Documentos centralizados</h2><p>Las cotizaciones y resúmenes de cobro se generan desde los registros de cada cliente.</p><button class="primary-button document-action" data-section-link="clients">Ir a clientes</button></div>
       </section>
-
-      <!-- SETTINGS -->
       <section class="page-section" id="settings">
-        <div class="page-heading compact"><div><div class="eyebrow">SISTEMA</div><h1>Configuración</h1><p>Preferencias básicas de tu gestión freelance.</p></div></div>
-        <div class="settings-grid">
-          <div class="panel setting-card"><span>Marca</span><strong>Claudia R.</strong><small>Comunicación · Desarrollo Web · Estrategia Digital</small></div>
-          <div class="panel setting-card"><span>Comprobante habitual</span><strong>Recibo por Honorarios</strong><small>La cotización no suma la retención.</small></div>
-          <div class="panel setting-card"><span>Datos</span><strong>Privados</strong><small>La información de clientes se almacena en Google Sheets.</small></div>
-        </div>
+        <div class="page-heading compact"><div><div class="eyebrow">SISTEMA</div><h1>Configuración</h1></div></div>
         <div class="panel settings-form-panel">
-          <div class="panel-head"><div><div class="eyebrow">TRIBUTARIO</div><h2>Configuración de RHE</h2><p>Estos valores son internos y no se muestran en las cotizaciones.</p></div></div>
           <form id="settingsForm" class="form-grid">
             <label>Comprobante<select name="documentType"><option>Recibo por Honorarios</option></select></label>
             <label>Tasa de retención (%)<input type="number" name="retentionRate" step="0.01" min="0" value="8"></label>
-            <label>Monto de referencia sin retención<input type="number" name="noRetentionThreshold" step="0.01" min="0" value="1500"></label>
-            <div class="field-note full">La tasa es editable aquí. La retención no se suma a la cotización: se gestiona, cuando corresponda, al emitir y pagar el RHE.</div>
-            <div class="modal-actions full"><button class="primary-button" type="submit">Guardar configuración</button></div>
+            <div class="modal-actions full"><button class="primary-button" type="submit">Guardar</button></div>
           </form>
         </div>
       </section>
-
     </main>
   </div>
 
+  <!-- ==================== MODALES ==================== -->
+  
   <!-- MODAL CLIENTE -->
   <div class="modal-backdrop" id="clientModal">
     <div class="modal wide">
-      <div class="modal-head"><div><div class="eyebrow">CLIENTES</div><h2 id="clientModalTitle">Nuevo cliente</h2></div><button class="close-button" data-close="clientModal"><svg><use href="#i-close"/></svg></button></div>
+      <div class="modal-head"><div><div class="eyebrow">CLIENTES</div><h2 id="clientModalTitle">Nuevo cliente</h2></div><button class="close-button hover-effect" data-close="clientModal"><svg><use href="#i-close"/></svg></button></div>
       <form id="clientForm">
         <input type="hidden" name="clientId" id="clientId">
         <div class="form-grid">
           <label>Nombre / empresa<input name="name" required></label>
-          <label>Tipo de documento<select name="documentType"><option>RUC</option><option>DNI</option><option>Pasaporte</option><option>Otro</option></select></label>
-          <label>Número de documento<input name="document"></label>
-          <label>Persona de contacto<input name="contact"></label>
+          <label>Tipo de doc.<select name="documentType"><option>RUC</option><option>DNI</option></select></label>
+          <label>Número<input name="document"></label>
           <label>Correo<input type="email" name="email"></label>
-          <label>Teléfono<input name="phone"></label>
           <label>País<input name="country" value="Perú"></label>
-          <label>Moneda habitual<select name="currency"><option>USD</option><option>PEN</option></select></label>
-          <label class="full">Dirección<input name="address"></label>
-          <label class="full">Notas<textarea name="notes" rows="3"></textarea></label>
+          <label class="full">Notas<textarea name="notes" rows="2"></textarea></label>
         </div>
-        <div class="modal-actions"><button type="button" class="secondary-button" data-close="clientModal">Cancelar</button><button class="primary-button" type="submit"><span id="clientSubmitLabel">Guardar cliente</span></button></div>
+        <div class="modal-actions"><button type="button" class="secondary-button" data-close="clientModal">Cancelar</button><button class="primary-button hover-effect" type="submit"><span id="clientSubmitLabel">Guardar cliente</span></button></div>
       </form>
     </div>
   </div>
 
-  <!-- MODAL SERVICIO / CONTRATACIÓN -->
-  <div class="modal-backdrop" id="serviceModal">
-    <div class="modal wide">
-      <div class="modal-head"><div><div class="eyebrow">CONTRATACIÓN</div><h2 id="serviceModalTitle">Nuevo servicio</h2></div><button class="close-button" data-close="serviceModal"><svg><use href="#i-close"/></svg></button></div>
+  <!-- MODAL SERVICIO (¡NUEVO Y MINIMALISTA!) -->
+  <div class="modal-backdrop" id="serviceModal" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="modal-head">
+        <div><div class="eyebrow">CONTRATACIÓN</div><h2 id="serviceModalTitle">Nuevo servicio</h2></div>
+        <button class="close-button hover-effect" data-close="serviceModal"><svg><use href="#i-close"/></svg></button>
+      </div>
       <form id="serviceForm">
         <input type="hidden" name="serviceId" id="serviceId">
         <div class="form-grid">
-          <label>Cliente<select name="clientId" id="serviceClient" required></select></label>
-          <label>Servicio del catálogo<select name="serviceCatalog" id="serviceCatalog"></select></label>
-          <label>Nombre del servicio<input name="service" required placeholder="Ej. Gestión web mensual"></label>
-          <label>Proveedor<input name="provider" placeholder="Ej. Wix, Google"></label>
-          <label class="full">Descripción<input name="description"></label>
-          <label>Fecha de inicio<input type="date" name="start" required></label>
-          <label>Fecha de fin<input type="date" name="end" required></label>
-          <label>Cantidad<input type="number" name="quantity" min="1" value="1" required></label>
+          <label class="full">Cliente<select name="clientId" id="serviceClient" required></select></label>
+          <label class="full">Servicio que brindo<input name="service" required placeholder="Ej. Diseño y desarrollo web completo"></label>
+          <label>Lo que me cuesta a mí (Costo)<input type="number" name="cost" id="serviceCost" step="0.01" min="0" value="0"></label>
+          <label>Lo que le cobro al cliente (Precio)<input type="number" name="price" id="servicePrice" step="0.01" min="0" required></label>
           <label>Moneda<select name="currency"><option>USD</option><option>PEN</option></select></label>
-          <label>Costo real<input type="number" name="cost" step="0.01" min="0" value="0"></label>
-          <label>Precio cliente<input type="number" name="price" step="0.01" min="0" required></label>
-          <label>Comprobante<select name="documentType"><option>Recibo por Honorarios</option></select></label>
-          <label>RHE emitido<select name="rheEmitted"><option>No</option><option>Sí</option></select></label>
-          <label>N.° RHE<input name="rheNumber" placeholder="Ej. E001-123"></label>
-          <label>Fecha RHE<input type="date" name="rheDate"></label>
-          <label>Estado servicio<select name="status"><option>Activo</option><option>Pendiente</option><option>Finalizado</option></select></label>
-          <label>Estado de pago<select name="payment"><option>Pendiente</option><option>Pagado</option></select></label>
-          <label>Fecha de pago<input type="date" name="paymentDate"></label>
-          <label>Medio de pago<select name="paymentMethod"><option value="">—</option><option>Transferencia</option><option>Yape / Plin</option><option>Tarjeta</option><option>Efectivo</option><option>Otro</option></select></label>
-          <label class="full">Notas<textarea name="notes" rows="3"></textarea></label>
+          <label>Estado<select name="status"><option>Activo</option><option>Finalizado</option></select></label>
         </div>
-        <div class="profit-preview"><span>Ganancia interna</span><strong id="profitPreview">$0.00</strong><small>No se muestra al cliente.</small></div>
-                <div class="modal-actions"><button type="button" class="secondary-button" data-close="serviceModal">Cancelar</button><button class="primary-button" type="submit"><span id="serviceSubmitLabel">Guardar servicio</span></button></div>
+        <div class="profit-preview" style="margin-top: 20px;">
+          <span>Mi Ganancia Real</span>
+          <strong id="profitPreview" style="color: var(--green);">$0.00</strong>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="secondary-button" data-close="serviceModal">Cancelar</button>
+          <button class="primary-button hover-effect" type="submit"><span id="serviceSubmitLabel">Guardar servicio</span></button>
+        </div>
       </form>
     </div>
   </div>
 
-  <!-- MODAL PAGO -->
-  <div class="modal-backdrop" id="paymentModal">
-    <div class="modal">
-      <div class="modal-head"><div><div class="eyebrow">PAGOS</div><h2>Registrar pago</h2><p id="paymentServiceName"></p></div><button class="close-button" data-close="paymentModal"><svg><use href="#i-close"/></svg></button></div>
-      <form id="paymentForm">
-        <input type="hidden" name="serviceId">
-        <div class="form-grid">
-          <label>Estado<select name="payment"><option>Pendiente</option><option>Pagado</option></select></label>
-          <label>Fecha de pago<input type="date" name="paymentDate"></label>
-          <label>Medio de pago<select name="paymentMethod"><option>Transferencia</option><option>Yape / Plin</option><option>Tarjeta</option><option>Efectivo</option><option>Otro</option></select></label>
-          <label class="full">Nota del pago<textarea name="notes" rows="3" placeholder="Referencia, banco, observación, etc."></textarea></label>
-        </div>
-        <div class="modal-actions"><button type="button" class="secondary-button" data-close="paymentModal">Cancelar</button><button class="primary-button" type="submit">Guardar pago</button></div>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL CATÁLOGO -->
-  <div class="modal-backdrop" id="catalogModal">
+  <!-- MODAL COBRO (¡LÓGICA SUNAT 8% CORRECTA!) -->
+  <div class="modal-backdrop" id="billingModal" role="dialog" aria-modal="true">
     <div class="modal wide">
-      <div class="modal-head"><div><div class="eyebrow">CATÁLOGO</div><h2 id="catalogModalTitle">Nuevo servicio del catálogo</h2></div><button class="close-button" data-close="catalogModal"><svg><use href="#i-close"/></svg></button></div>
-      <form id="catalogForm">
-        <input type="hidden" name="catalogId">
-        <div class="form-grid">
-          <label>Nombre del servicio<input name="name" required placeholder="Ej. Diseño y desarrollo web"></label>
-          <label>Proveedor<input name="provider" placeholder="Ej. Wix / Google / Propio"></label>
-          <label class="full">Descripción<input name="description"></label>
-          <label>Periodicidad<select name="periodicity"><option>Mensual</option><option>Trimestral</option><option>Semestral</option><option>Anual</option><option>Único</option><option>Variable</option></select></label>
-          <label>Moneda base<select name="baseCurrency"><option>USD</option><option>PEN</option></select></label>
-          <label>Activo<select name="active"><option>Sí</option><option>No</option></select></label>
-        </div>
-        <div class="modal-actions"><button type="button" class="secondary-button" data-close="catalogModal">Cancelar</button><button class="primary-button" type="submit"><span id="catalogSubmitLabel">Guardar servicio</span></button></div>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL COBRO AGRUPADO -->
-  <div class="modal-backdrop" id="billingModal">
-    <div class="modal wide">
-      <div class="modal-head"><div><div class="eyebrow">COBRO</div><h2>Generar cobro</h2><p id="billingClientName"></p></div><button class="close-button" data-close="billingModal"><svg><use href="#i-close"/></svg></button></div>
+      <div class="modal-head">
+        <div><div class="eyebrow">COBRO RHE</div><h2>Generar Cobro</h2><p id="billingClientName"></p></div>
+        <button class="close-button hover-effect" data-close="billingModal"><svg><use href="#i-close"/></svg></button>
+      </div>
       <form id="billingForm">
         <input type="hidden" name="clientId">
-        <div class="billing-summary-card">
-          <div><span>Servicios pendientes</span><strong id="billingBaseTotal">$0.00</strong></div>
-          <div><span>Comprobante</span><strong>Recibo por Honorarios</strong></div>
+        <div class="billing-summary-card" style="grid-template-columns: 1fr;">
+          <div><span>Monto líquido de los servicios (Lo que debes recibir)</span><strong id="billingBaseTotal">$0.00</strong></div>
         </div>
-        <div class="form-grid">
-          <label class="full check-field"><input type="checkbox" id="billingRetentionCheck" name="retention" value="Sí"><span><strong>Aplicar retención RHE</strong><small>Usar la tasa configurada: <b id="billingRateLabel">8%</b></small></span></label>
-          <label>El monto ingresado corresponde a<select name="mode"><option value="gross">Honorario bruto</option><option value="net">Monto neto que quiero recibir</option></select></label>
-          <label id="billingAmountField" style="display:none">Monto neto deseado<input type="number" name="amount" step="0.01" min="0" placeholder="Ej. 2500.00"></label>
+        <div class="form-grid" style="margin-top: 15px;">
+          <label class="full check-field">
+            <input type="checkbox" id="billingRetentionCheck" name="retention" checked>
+            <span>
+              <strong>Añadir 8% de retención (SUNAT)</strong>
+              <small>Calcula el monto bruto exacto para que, al restarte el 8%, recibas tu dinero completo.</small>
+            </span>
+          </label>
         </div>
-        <div class="billing-calculation">
-          <div><span>Modo</span><strong id="billingModeLabel">Sin retención</strong></div>
-          <div><span>Honorarios</span><strong id="billingGross">$0.00</strong></div>
-          <div><span>Retención RHE</span><strong id="billingRetention">$0.00</strong></div>
-          <div class="billing-total"><span>Neto a pagar</span><strong id="billingNet">$0.00</strong></div>
+        <div class="billing-calculation" style="background: #fbfaf7;">
+          <div><span>Monto líquido para ti (Neto)</span><strong id="billingNet">$0.00</strong></div>
+          <div><span>+ Retención SUNAT (8%)</span><strong id="billingRetention" style="color: #8c5b5b;">$0.00</strong></div>
+          <div class="billing-total" style="border-top-color: #bfc3bd;">
+            <span>Total a cobrarle al cliente (Bruto)</span><strong id="billingGross" style="font-size: 26px; color: var(--green);">$0.00</strong>
+          </div>
         </div>
-        <div class="field-note full" id="billingHint">Sin retención: el total del cobro es igual a la suma de los servicios.</div>
-        <div class="modal-actions"><button type="button" class="secondary-button" data-close="billingModal">Cancelar</button><button class="primary-button" type="submit"><svg><use href="#i-download"/></svg> Generar PDF</button></div>
+        <div class="modal-actions" style="margin-top: 25px;">
+          <button type="button" class="secondary-button" data-close="billingModal">Cancelar</button>
+          <button class="primary-button hover-effect" type="submit"><svg><use href="#i-download"/></svg> Generar Cobro</button>
+        </div>
       </form>
     </div>
   </div>
 
-  <!-- MODAL COTIZACIÓN -->
+  <!-- MODALES EXTRAS (PAGOS, COTIZACIONES) -->
+  <div class="modal-backdrop" id="paymentModal">
+    <div class="modal"><div class="modal-head"><div><h2>Registrar pago</h2></div><button class="close-button" data-close="paymentModal"><svg><use href="#i-close"/></svg></button></div>
+      <form id="paymentForm"><input type="hidden" name="serviceId"><div class="form-grid"><label>Estado<select name="payment"><option>Pendiente</option><option>Pagado</option></select></label><label>Medio<select name="paymentMethod"><option>Transferencia</option><option>Efectivo</option></select></label></div><div class="modal-actions"><button type="submit" class="primary-button">Guardar</button></div></form>
+    </div>
+  </div>
+  
   <div class="modal-backdrop" id="quoteModal">
-    <div class="modal wide">
-      <div class="modal-head"><div><div class="eyebrow">DOCUMENTO</div><h2 id="quoteModalTitle">Nueva cotización</h2></div><button class="close-button" data-close="quoteModal"><svg><use href="#i-close"/></svg></button></div>
+    <div class="modal wide"><div class="modal-head"><div><h2 id="quoteModalTitle">Nueva cotización</h2></div><button class="close-button" data-close="quoteModal"><svg><use href="#i-close"/></svg></button></div>
       <form id="quoteForm">
         <input type="hidden" name="quoteId" id="quoteId">
-        <div class="form-grid">
-          <label>Cliente<select name="clientId" id="quoteClient" required></select></label>
-          <label>Fecha<input type="date" name="date" required></label>
-          <label class="full">Servicio / propuesta<input name="title" required placeholder="Ej. Diseño y desarrollo web"></label>
-          <label class="full">Descripción<textarea name="description" rows="4" placeholder="Describe brevemente el alcance para el cliente."></textarea></label>
-          <label>Precio base<input type="number" name="price" step="0.01" min="0" required></label>
-          <label>Moneda<select name="currency"><option>USD</option><option>PEN</option></select></label>
-          <label>Comprobante<select name="documentType"><option>Recibo por Honorarios</option></select></label>
-          <div class="field-note full">La cotización define el monto comercial del servicio. La retención RHE se configura únicamente al momento del cobro.</div>
-          <label>Validez<input name="validity" value="15 días"></label>
-          <label>Estado<select name="status"><option>Borrador</option><option>Enviada</option><option>Aceptada</option><option>Rechazada</option><option>Vencida</option></select></label>
-          <label class="full">Notas internas<textarea name="notes" rows="2" placeholder="No se muestran al cliente."></textarea></label>
-        </div>
-        <div class="tax-preview" id="quoteTaxPreview">Honorarios <strong>$0.00</strong> · Comprobante: Recibo por Honorarios</div>
-        <div class="quote-private-note">El PDF para el cliente contiene únicamente la información comercial. Costos internos, ganancia, RHE y otros datos tributarios internos quedan fuera.</div>
-        <div class="modal-actions"><button type="button" class="secondary-button" data-close="quoteModal">Cancelar</button><button class="primary-button" type="submit"><svg><use href="#i-download"/></svg><span id="quoteSubmitLabel">Generar documento</span></button></div>
+        <div class="form-grid"><label>Cliente<select name="clientId" id="quoteClient"></select></label><label class="full">Servicio<input name="title" required></label><label>Precio<input type="number" name="price" step="0.01" required></label></div>
+        <div class="modal-actions"><button type="submit" class="primary-button">Generar documento</button></div>
       </form>
     </div>
   </div>
 
-  <div class="toast" id="toast"></div>
-  <script src="js/00-config.js"></script>
-    <script src="js/00-api.js"></script>
-    <script src="js/01-core.js"></script>
-  <script src="js/02-dashboard.js"></script>
-  <script src="js/03-clients.js"></script>
-  <script src="js/04-services.js"></script>
-  <script src="js/05-quotes.js"></script>
-  <script src="js/06-finance.js"></script>
-  <script src="js/07-ui.js"></script>
-  <script src="js/08-documents.js"></script>
-  <script src="js/09-app.js"></script>
+  <div class="toast" id="toast" role="alert" aria-live="assertive"></div>
 </body>
 </html>
