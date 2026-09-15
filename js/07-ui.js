@@ -6,6 +6,31 @@ function populateClientSelects() {
   if ($("#quoteClient")) $("#quoteClient").innerHTML = options;
 }
 
+
+// NAVEGACIÓN PRINCIPAL
+function showSection(sectionId) {
+  const sections = $$('.page-section');
+  sections.forEach(section => section.classList.toggle('active', section.id === sectionId));
+
+  $$('.nav-item[data-section]').forEach(button => {
+    button.classList.toggle('active', button.dataset.section === sectionId);
+  });
+
+  $$('.[data-section-link]').forEach(button => {
+    button.classList.toggle('active', button.dataset.sectionLink === sectionId);
+  });
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+$$('.nav-item[data-section]').forEach(button => {
+  button.addEventListener('click', () => showSection(button.dataset.section));
+});
+
+$$('[data-section-link]').forEach(button => {
+  button.addEventListener('click', () => showSection(button.dataset.sectionLink));
+});
+
 function openModal(id) { populateClientSelects(); if (typeof populateCatalogSelect === "function") populateCatalogSelect(); $(`#${id}`)?.classList.add("open"); }
 function closeModal(id) { $(`#${id}`)?.classList.remove("open"); }
 
