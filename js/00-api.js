@@ -1,22 +1,27 @@
 /* API — Google Apps Script V2 */
+
 function apiConfigured(){ return !!(API_CONFIG?.URL && API_CONFIG.URL.includes('/exec')); }
-function getApiToken(){ return sessionStorage.getItem('CRF_API_TOKEN') || ''; }
-function setApiToken(token){ token ? sessionStorage.setItem('CRF_API_TOKEN', String(token).trim()) : sessionStorage.removeItem('CRF_API_TOKEN'); }
-function clearApiToken(){ sessionStorage.removeItem('CRF_API_TOKEN'); }
+function getApiPin(){ return sessionStorage.getItem('CRF_API_PIN') || ''; }
+function setApiPin(pin){ pin ? sessionStorage.setItem('CRF_API_PIN', String(pin).trim()) : sessionStorage.removeItem('CRF_API_PIN'); }
+function clearApiPin(){ sessionStorage.removeItem('CRF_API_PIN'); }
 
 async function apiRequest(action, method='GET', payload={}){
   if(!apiConfigured()) throw new Error('API no configurada');
-  const token=getApiToken();
-  if(!token) throw new Error('Falta el token de acceso.');
-  let url=API_CONFIG.URL, options={method,credentials:'omit',cache:'no-store'};
+  const pin=getApiPin();
+  if(!pin) throw new Error('Falta el PIN de acceso.');
+
+  let url=API_CONFIG.URL;
+  const options={method,credentials:'omit',cache:'no-store'};
+
   if(method==='GET'){
-    const q=new URLSearchParams({token,action});
+    const q=new URLSearchParams({pin,action});
     Object.entries(payload||{}).forEach(([k,v])=>{if(v!==undefined&&v!==null)q.set(k,String(v));});
     url += '?' + q.toString();
   }else{
-    const body=new URLSearchParams(); body.set('token',token); body.set('action',action); body.set('payload',JSON.stringify(payload||{}));
-    options.headers={'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'}; options.body=body.toString();
+    options.headers={'Content-Type':'application/json;charset=UTF-8'};
+    options.body=JSON.stringify({pin,action,data:payload||{}});
   }
+
   const response=await fetch(url,options);
   if(!response.ok) throw new Error(`API ${response.status}`);
   const data=await response.json();
