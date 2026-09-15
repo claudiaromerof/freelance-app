@@ -21,7 +21,7 @@ function resetClientForm() {
 }
 function resetServiceForm() {
   const form = $("#serviceForm"); if (!form) return;
-  form.reset(); form.elements.serviceId.value = ""; form.elements.quantity.value = 1; form.elements.status.value = "Activo";
+  form.reset(); form.elements.serviceId.value = ""; form.elements.quantity.value = 1; form.elements.payment.value = "Pendiente"; form.elements.status.value = "Activo"; form.elements.documentType.value = currentSettings().documentType; form.elements.rheEmitted.value = "No";
   populateCatalogSelect(); $("#serviceModalTitle").textContent = "Nuevo servicio"; $("#serviceSubmitLabel").textContent = "Guardar servicio"; updateProfitPreview();
 }
 function resetQuoteForm() {
@@ -70,34 +70,13 @@ $("#clientForm")?.addEventListener('submit', async event => {
 $("#serviceForm")?.addEventListener('submit', async event => {
   event.preventDefault();
   const data = Object.fromEntries(new FormData(event.currentTarget).entries());
-  if (!data.clientId || !data.serviceCatalog) return toast('Completa cliente y servicio.');
+  if (!data.clientId || !data.service?.trim()) return toast('Completa cliente y servicio.');
   if (!data.start || !data.end || data.end < data.start) return toast('Revisa el periodo del servicio.');
-  const id = data.serviceId?.trim();
-  const existing = id ? state.services.find(s => s.id === id) : null;
-  if (id && !existing) return toast('No se encontró el servicio.');
-  const catalog = getCatalogItem(data.serviceCatalog);
-  const payload = {
-    id: id || newId('CNT'),
-    clientId: data.clientId,
-    serviceId: catalog?.id || existing?.serviceId || data.serviceCatalog,
-    service: catalog?.name || existing?.service || 'Servicio',
-    provider: catalog?.provider || existing?.provider || '',
-    description: data.description?.trim() || catalog?.description || existing?.description || '',
-    start: data.start, end: data.end, quantity: Number(data.quantity || 1),
-    cost: Number(data.cost || 0), price: Number(data.price || 0), currency: data.currency || 'USD',
-    status: data.status || 'Activo',
-    payment: existing?.payment || 'Pendiente', paymentDate: existing?.paymentDate || '', paymentMethod: existing?.paymentMethod || '',
-    documentType: existing?.documentType || currentSettings().documentType,
-    retentionApplies: existing?.retentionApplies || 'No', retentionRate: existing?.retentionRate || Number(currentSettings().retentionRate || 8),
-    retentionAmount: existing?.retentionAmount || 0, netReceived: existing?.netReceived || 0,
-    rheEmitted: existing?.rheEmitted || 'No', rheNumber: existing?.rheNumber || '', rheDate: existing?.rheDate || '',
-    notes: existing?.notes || ''
-  };
-  const old = structuredClone(state);
-  if (id) state.services[state.services.findIndex(s => s.id === id)] = payload; else state.services.unshift(payload);
-  const ok = await persistAndRefresh();
-  if (!ok) { state = old; refreshAll(); return; }
-  closeModal('serviceModal'); showSection('services'); toast(id ? 'Servicio actualizado correctamente.' : 'Servicio guardado correctamente.');
+  const id=data.serviceId?.trim(); const existing=id ? state.services.find(s=>s.id===id) : null; if (id && !existing) return toast('No se encontró el servicio.');
+  const catalog=getCatalogItem(data.serviceCatalog);
+  const payload={ id:id||newId('CNT'), clientId:data.clientId, serviceId:catalog?.id || existing?.serviceId || data.serviceCatalog || '', service:(catalog?.name || existing?.service || 'Servicio'), provider:(catalog?.provider || existing?.provider || ''), description:data.description.trim() || catalog?.description || '', start:data.start,end:data.end,quantity:Number(data.quantity||1),cost:Number(data.cost||0),price:Number(data.price||0),currency:data.currency||'USD',documentType:existing?.documentType || currentSettings().documentType,retentionApplies:existing?.retentionApplies || 'Según corresponda',retentionRate:existing?.retentionRate || Number(currentSettings().retentionRate||8),retentionAmount:existing?.retentionAmount || 0,netReceived:existing?.netReceived || 0,status:data.status||'Activo',payment:existing?.payment||'Pendiente',paymentDate:existing?.paymentDate||'',paymentMethod:existing?.paymentMethod||'',rheEmitted:existing?.rheEmitted||'No',rheNumber:existing?.rheNumber||'',rheDate:existing?.rheDate||'',notes:data.notes.trim() };
+  const old=structuredClone(state); if(id){state.services[state.services.findIndex(s=>s.id===id)]=payload;}else state.services.unshift(payload);
+  const ok=await persistAndRefresh(); if(!ok){state=old;refreshAll();return;} closeModal('serviceModal');showSection('services');toast(id?'Servicio actualizado correctamente.':'Servicio guardado correctamente.');
 });
 
 $("#paymentForm")?.addEventListener('submit', async event=>{
@@ -134,7 +113,7 @@ function updateQuotePreview(){
 function openBillingModal(clientId) {
   const client = getClient(clientId);
   if (!client) return toast("No se encontró el cliente.");
-  const services = getBillingServices(clientId);
+  const services = state.services.filter(s => s.clientId === clientId && s.status !== "Finalizado" && s.payment !== "Pagado");
   if (!services.length) return toast("Este cliente no tiene servicios activos o pendientes para cobrar.");
   const currencies = [...new Set(services.map(s => s.currency || "USD"))];
   if (currencies.length > 1) return toast("El cliente tiene servicios en monedas distintas. Revísalos antes de cobrar.");
@@ -142,7 +121,9 @@ function openBillingModal(clientId) {
   if (!form) return toast("No se encontró el formulario de cobro.");
   form.reset();
   form.elements.clientId.value = clientId;
-  form.elements.retention.checked = false;
+  form.elements.retention.checked = true;
+  form.elements.mode.value = "net";
+  form.elements.amount.value = "";
   $("#billingClientName").textContent = client.name || "Cliente";
   $("#billingRateLabel").textContent = `${Number(currentSettings().retentionRate || 8)}%`;
   updateBillingPreview();
@@ -160,27 +141,47 @@ function billingCalculation(clientId) {
   const baseTotal = services.reduce((sum,s)=>sum + serviceTotal(s),0);
   const apply = Boolean(form?.elements.retention?.checked);
   const rate = Number(currentSettings().retentionRate || 8);
-  let gross = baseTotal, retained = 0, net = baseTotal;
-  if (apply && rate > 0 && rate < 100) {
+  const mode = form?.elements.mode.value || "gross";
+  const entered = Number(form?.elements.amount.value || 0);
+  let gross = baseTotal;
+  let retained = 0;
+  let net = baseTotal;
+  if (apply) {
+    if (mode === "net") {
+      net = entered || baseTotal;
+      gross = rate >= 100 ? net : net / (1 - rate / 100);
+      retained = gross - net;
+    } else {
+      gross = baseTotal;
+      retained = gross * rate / 100;
+      net = gross - retained;
+    }
+  } else {
+    gross = baseTotal;
     net = baseTotal;
-    gross = baseTotal / (1 - rate / 100);
-    retained = gross - net;
   }
-  return { services, currency, baseTotal, apply, rate, gross, retained, net };
+  return {services,currency,baseTotal,apply,rate,mode,entered,gross,retained,net};
 }
 
 function updateBillingPreview() {
-  const form = $("#billingForm"); if (!form) return;
-  const calc = billingCalculation(form.elements.clientId.value);
+  const form = $("#billingForm");
+  if (!form) return;
+  const clientId = form.elements.clientId.value;
+  const calc = billingCalculation(clientId);
   const currency = calc.currency;
+  const mode = calc.apply ? (calc.mode === "net" ? "Neto deseado" : "Honorario bruto") : "Sin retención";
   $("#billingBaseTotal").textContent = money(calc.baseTotal, currency);
-  if ($("#billingBaseTotal2")) $("#billingBaseTotal2").textContent = money(calc.baseTotal, currency);
   $("#billingGross").textContent = money(calc.gross, currency);
   $("#billingRetention").textContent = calc.apply ? `− ${money(calc.retained, currency)}` : money(0, currency);
   $("#billingNet").textContent = money(calc.net, currency);
-  $("#billingModeLabel") && ($("#billingModeLabel").textContent = calc.apply ? "Neto protegido" : "Sin retención");
+  $("#billingModeLabel").textContent = mode;
+  const amount = $("#billingAmountField");
+  if (amount) amount.style.display = calc.apply && calc.mode === "net" ? "block" : "none";
+  if (calc.apply && calc.mode === "net" && amount && form.elements.amount && !form.elements.amount.value) {
+    form.elements.amount.value = calc.baseTotal.toFixed(2);
+  }
   const note = $("#billingHint");
-  if (note) note.textContent = calc.apply ? `Se incrementa el honorario bruto para que, después de la retención RHE del ${calc.rate}%, recibas ${money(calc.net, currency)}.` : "Sin retención: el honorario coincide con el total de los servicios.";
+  if (note) note.textContent = calc.apply ? `Retención RHE ${calc.rate}% aplicada solo en este cobro. El cálculo no modifica los precios guardados de los servicios.` : "Sin retención: el total del cobro es igual a la suma de los servicios.";
 }
 
 $("#billingForm")?.addEventListener("input", updateBillingPreview);
@@ -191,7 +192,7 @@ $("#billingForm")?.addEventListener("submit", event => {
   const calc = billingCalculation(form.elements.clientId.value);
   if (!calc.services.length) return toast("No quedan servicios pendientes para cobrar a este cliente.");
   closeModal("billingModal");
-  downloadClientBilling(form.elements.clientId.value, { applyRetention: calc.apply, rate: calc.rate, gross: calc.gross, retained: calc.retained, net: calc.net });
+  downloadClientBilling(form.elements.clientId.value, { applyRetention: calc.apply, rate: calc.rate, gross: calc.gross, retained: calc.retained, net: calc.net, mode: calc.mode });
 });
 
 // CONFIGURACIÓN TRIBUTARIA / DOCUMENTARIA
@@ -200,9 +201,13 @@ $("#settingsForm")?.addEventListener("submit", async event => {
   const data = Object.fromEntries(new FormData(event.currentTarget).entries());
   const old = structuredClone(state);
   state.settings = {
-    documentType: data.documentType || "Recibo por Honorarios",
+    documentType: "Recibo por Honorarios",
     retentionRate: Number(data.retentionRate || 8),
-    noRetentionThreshold: Number(data.noRetentionThreshold || 1500)
+    noRetentionThreshold: Number(data.noRetentionThreshold || 1500),
+    paymentHolder: data.paymentHolder?.trim() || "Claudia Romero Fonseca",
+    bankUSD: data.bankUSD?.trim() || "", accountUSD: data.accountUSD?.trim() || "", cciUSD: data.cciUSD?.trim() || "",
+    bankPEN: data.bankPEN?.trim() || "", accountPEN: data.accountPEN?.trim() || "", cciPEN: data.cciPEN?.trim() || "",
+    mobilePayment: data.mobilePayment?.trim() || ""
   };
   const ok = await persistAndRefresh();
   if (!ok) { state = old; refreshAll(); return; }
@@ -213,7 +218,11 @@ $("#settingsForm")?.addEventListener("submit", async event => {
 function populateSettingsForm() {
   const form = $("#settingsForm"); if (!form) return;
   const cfg = currentSettings();
-  form.elements.documentType.value = cfg.documentType || "Recibo por Honorarios";
+  form.elements.documentType.value = "Recibo por Honorarios";
   form.elements.retentionRate.value = cfg.retentionRate ?? 8;
   form.elements.noRetentionThreshold.value = cfg.noRetentionThreshold ?? 1500;
+  form.elements.paymentHolder.value = cfg.paymentHolder || "Claudia Romero Fonseca";
+  form.elements.bankUSD.value = cfg.bankUSD || ""; form.elements.accountUSD.value = cfg.accountUSD || ""; form.elements.cciUSD.value = cfg.cciUSD || "";
+  form.elements.bankPEN.value = cfg.bankPEN || ""; form.elements.accountPEN.value = cfg.accountPEN || ""; form.elements.cciPEN.value = cfg.cciPEN || "";
+  form.elements.mobilePayment.value = cfg.mobilePayment || "";
 }

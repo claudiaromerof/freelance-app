@@ -60,6 +60,8 @@ function openServiceEditor(id) {
   form.elements.serviceId.value = service.id || "";
   form.elements.clientId.value = service.clientId || "";
   form.elements.serviceCatalog.value = service.serviceId || "";
+  form.elements.service.value = service.service || "";
+  form.elements.description.value = service.description || "";
   form.elements.start.value = service.start || "";
   form.elements.end.value = service.end || "";
   form.elements.quantity.value = service.quantity ?? 1;
@@ -67,7 +69,14 @@ function openServiceEditor(id) {
   form.elements.cost.value = service.cost ?? 0;
   form.elements.price.value = service.price ?? 0;
   form.elements.status.value = service.status || "Activo";
-  form.elements.description.value = service.description || "";
+  form.elements.payment.value = service.payment || "Pendiente";
+  form.elements.paymentDate.value = service.paymentDate || "";
+  form.elements.paymentMethod.value = service.paymentMethod || "";
+  form.elements.rheEmitted.value = service.rheEmitted || "No";
+  form.elements.rheNumber.value = service.rheNumber || "";
+  form.elements.rheDate.value = service.rheDate || "";
+  form.elements.retentionApplies.value = service.retentionApplies || "Según corresponda";
+  form.elements.notes.value = service.notes || "";
   $("#serviceModalTitle").textContent = "Editar servicio";
   $("#serviceSubmitLabel").textContent = "Guardar cambios";
   updateProfitPreview(); openModal("serviceModal");
@@ -106,10 +115,14 @@ function updateProfitPreview() {
   const form = $("#serviceForm"); if (!form) return;
   const profit = (Number(form.elements.price.value || 0) - Number(form.elements.cost.value || 0)) * Number(form.elements.quantity.value || 1);
   $("#profitPreview").textContent = money(profit, form.elements.currency.value || "USD");
+  const gross = Number(form.elements.price.value || 0) * Number(form.elements.quantity.value || 1);
+  const mode = form.elements.retentionApplies?.value || "Según corresponda";
+  const applies = mode === "Sí" || (mode === "Según corresponda" && gross > Number(currentSettings().noRetentionThreshold || 1500));
+  const ret = rheRetention(gross, applies);
+  if ($("#retentionPreview")) $("#retentionPreview").textContent = money(ret.retained, form.elements.currency.value || "USD");
 }
 
-["price","cost","quantity","currency"].forEach(name => {
+["price","cost","quantity","currency","retentionApplies"].forEach(name => {
   $("#serviceForm")?.elements[name]?.addEventListener("input", updateProfitPreview);
   $("#serviceForm")?.elements[name]?.addEventListener("change", updateProfitPreview);
 });
-

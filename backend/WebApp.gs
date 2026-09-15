@@ -15,7 +15,11 @@ const API_TOKEN = "CM39nAfl8dCkEZhYUJ9JImhKnIz_Ma_TYqaSlRSFUyQ";
 const DEFAULT_SETTINGS = {
   documentType: "Recibo por Honorarios",
   retentionRate: 8,
-  noRetentionThreshold: 1500
+  noRetentionThreshold: 1500,
+  paymentHolder: "Claudia Romero Fonseca",
+  bankUSD: "", accountUSD: "", cciUSD: "",
+  bankPEN: "", accountPEN: "", cciPEN: "",
+  mobilePayment: ""
 };
 
 const HEADERS = {
@@ -208,9 +212,13 @@ function writeSheet_(ss,name,headers,rows) {
 
 function writeSettings_(ss,settings) {
   const rows = [
-    ["documentType", settings.documentType || DEFAULT_SETTINGS.documentType],
+    ["documentType", "Recibo por Honorarios"],
     ["retentionRate", Number(settings.retentionRate || DEFAULT_SETTINGS.retentionRate)],
-    ["noRetentionThreshold", Number(settings.noRetentionThreshold || DEFAULT_SETTINGS.noRetentionThreshold)]
+    ["noRetentionThreshold", Number(settings.noRetentionThreshold || DEFAULT_SETTINGS.noRetentionThreshold)],
+    ["paymentHolder", settings.paymentHolder || DEFAULT_SETTINGS.paymentHolder],
+    ["bankUSD", settings.bankUSD || ""], ["accountUSD", settings.accountUSD || ""], ["cciUSD", settings.cciUSD || ""],
+    ["bankPEN", settings.bankPEN || ""], ["accountPEN", settings.accountPEN || ""], ["cciPEN", settings.cciPEN || ""],
+    ["mobilePayment", settings.mobilePayment || ""]
   ];
   writeSheet_(ss,"CONFIGURACION",HEADERS.CONFIGURACION,rows);
 }

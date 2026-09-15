@@ -218,7 +218,17 @@
             <label>Comprobante<select name="documentType"><option>Recibo por Honorarios</option></select></label>
             <label>Tasa de retención (%)<input type="number" name="retentionRate" step="0.01" min="0" value="8"></label>
             <label>Monto de referencia sin retención<input type="number" name="noRetentionThreshold" step="0.01" min="0" value="1500"></label>
-            <div class="field-note full">La tasa es editable aquí. La retención no se suma a la cotización: se gestiona, cuando corresponda, al emitir y pagar el RHE.</div>
+            <div class="field-note full">La tasa es editable aquí. La retención se configura únicamente al momento del cobro.</div>
+            <div class="settings-subhead full">Datos para recibir pagos</div>
+            <label class="full">Titular de la cuenta<input name="paymentHolder" placeholder="Claudia Romero Fonseca"></label>
+            <label>Banco / plataforma USD<input name="bankUSD" placeholder="Ej. BCP"></label>
+            <label>Cuenta USD<input name="accountUSD" placeholder="Número de cuenta"></label>
+            <label>CCI USD<input name="cciUSD" placeholder="CCI"></label>
+            <label>Banco / plataforma PEN<input name="bankPEN" placeholder="Ej. BCP"></label>
+            <label>Cuenta PEN<input name="accountPEN" placeholder="Número de cuenta"></label>
+            <label>CCI PEN<input name="cciPEN" placeholder="CCI"></label>
+            <label>Yape / Plin<input name="mobilePayment" placeholder="Número, si deseas mostrarlo"></label>
+            <div class="field-note full">Estos datos se guardan en tu configuración y se muestran en los PDF de cobro según la moneda. No se muestran en cotizaciones.</div>
             <div class="modal-actions full"><button class="primary-button" type="submit">Guardar configuración</button></div>
           </form>
         </div>
@@ -253,22 +263,25 @@
   <!-- MODAL SERVICIO / CONTRATACIÓN -->
   <div class="modal-backdrop" id="serviceModal">
     <div class="modal wide">
-      <div class="modal-head"><div><div class="eyebrow">CONTRATACIÓN</div><h2 id="serviceModalTitle">Nuevo servicio</h2></div><button class="close-button" data-close="serviceModal"><svg><use href="#i-close"/></svg></button></div>
+      <div class="modal-head">
+        <div class="modal-brand-row"><div class="modal-crf">CRF</div><div><div class="eyebrow">CONTRATACIÓN</div><h2 id="serviceModalTitle">Nuevo servicio</h2></div></div>
+        <button class="close-button" data-close="serviceModal"><svg><use href="#i-close"/></svg></button>
+      </div>
       <form id="serviceForm">
         <input type="hidden" name="serviceId" id="serviceId">
-        <div class="form-grid">
+        <div class="form-grid service-simple-grid">
           <label>Cliente<select name="clientId" id="serviceClient" required></select></label>
           <label>Servicio<select name="serviceCatalog" id="serviceCatalog" required></select></label>
+          <label class="full">Descripción / detalle<input name="description" placeholder="Opcional"></label>
           <label>Fecha de inicio<input type="date" name="start" required></label>
           <label>Fecha de fin<input type="date" name="end" required></label>
           <label>Cantidad<input type="number" name="quantity" min="1" value="1" required></label>
           <label>Moneda<select name="currency"><option>USD</option><option>PEN</option></select></label>
-          <label>Costo para mí<input type="number" name="cost" step="0.01" min="0" value="0"></label>
-          <label>Precio al cliente<input type="number" name="price" step="0.01" min="0" required></label>
+          <label>Costo para mí<input type="number" name="cost" step="0.01" min="0" value="0" required></label>
+          <label>Cobro al cliente<input type="number" name="price" step="0.01" min="0" required></label>
           <label>Estado<select name="status"><option>Activo</option><option>Pendiente</option><option>Finalizado</option></select></label>
-          <label class="full">Detalle interno (opcional)<textarea name="description" rows="2" placeholder="Detalle o alcance breve del servicio."></textarea></label>
+          <label class="full">Notas internas<textarea name="notes" rows="3" placeholder="Opcional"></textarea></label>
         </div>
-        <div class="field-note full">Aquí solo administras el servicio: qué brindas, cuánto te cuesta y cuánto cobras. El pago y el Recibo por Honorarios se gestionan desde Cobro.</div>
         <div class="profit-preview"><span>Ganancia interna</span><strong id="profitPreview">$0.00</strong><small>No se muestra al cliente.</small></div>
         <div class="modal-actions"><button type="button" class="secondary-button" data-close="serviceModal">Cancelar</button><button class="primary-button" type="submit"><span id="serviceSubmitLabel">Guardar servicio</span></button></div>
       </form>
@@ -322,15 +335,17 @@
           <div><span>Comprobante</span><strong>Recibo por Honorarios</strong></div>
         </div>
         <div class="form-grid">
-          <label class="full check-field"><input type="checkbox" id="billingRetentionCheck" name="retention" value="Sí"><span><strong>Aplicar retención RHE <b id="billingRateLabel">8%</b></strong><small>La app aumenta el honorario bruto para que el monto que quieres recibir no se reduzca por la retención.</small></span></label>
+          <label class="full check-field"><input type="checkbox" id="billingRetentionCheck" name="retention" value="Sí"><span><strong>Considerar retención RHE</strong><small>La tasa configurada es <b id="billingRateLabel">8%</b>. Se calcula para que tu neto no reduzca el monto que deseas recibir.</small></span></label>
+          <label>El monto ingresado corresponde a<select name="mode"><option value="gross">Honorario bruto</option><option value="net">Monto neto que quiero recibir</option></select></label>
+          <label id="billingAmountField" style="display:none">Monto neto que quiero recibir<input type="number" name="amount" step="0.01" min="0" placeholder="Ej. 2000.00"><small class="field-help">La app calculará el honorario bruto necesario para que, después de la retención, recibas este monto.</small></label>
         </div>
         <div class="billing-calculation">
-          <div><span>Servicios</span><strong id="billingBaseTotal2">$0.00</strong></div>
-          <div><span>Honorario bruto RHE</span><strong id="billingGross">$0.00</strong></div>
+          <div><span>Modo</span><strong id="billingModeLabel">Sin retención</strong></div>
+          <div><span>Honorarios</span><strong id="billingGross">$0.00</strong></div>
           <div><span>Retención RHE</span><strong id="billingRetention">$0.00</strong></div>
-          <div class="billing-total"><span>Neto a recibir</span><strong id="billingNet">$0.00</strong></div>
+          <div class="billing-total"><span>Neto a pagar</span><strong id="billingNet">$0.00</strong></div>
         </div>
-        <div class="field-note full" id="billingHint">Sin retención: el honorario coincide con el total de los servicios.</div>
+        <div class="field-note full" id="billingHint">Sin retención: el total del cobro es igual a la suma de los servicios.</div>
         <div class="modal-actions"><button type="button" class="secondary-button" data-close="billingModal">Cancelar</button><button class="primary-button" type="submit"><svg><use href="#i-download"/></svg> Generar PDF</button></div>
       </form>
     </div>
@@ -363,16 +378,16 @@
   </div>
 
   <div class="toast" id="toast"></div>
-  <script src="js/00-config.js" defer></script>
-    <script src="js/00-api.js" defer></script>
-    <script src="js/01-core.js" defer></script>
-  <script src="js/02-dashboard.js" defer></script>
-  <script src="js/03-clients.js" defer></script>
-  <script src="js/04-services.js" defer></script>
-  <script src="js/05-quotes.js" defer></script>
-  <script src="js/06-finance.js" defer></script>
-  <script src="js/07-ui.js" defer></script>
-  <script src="js/08-documents.js" defer></script>
-  <script src="js/09-app.js" defer></script>
+  <script src="js/00-config.js"></script>
+    <script src="js/00-api.js"></script>
+    <script src="js/01-core.js"></script>
+  <script src="js/02-dashboard.js"></script>
+  <script src="js/03-clients.js"></script>
+  <script src="js/04-services.js"></script>
+  <script src="js/05-quotes.js"></script>
+  <script src="js/06-finance.js"></script>
+  <script src="js/07-ui.js"></script>
+  <script src="js/08-documents.js"></script>
+  <script src="js/09-app.js"></script>
 </body>
 </html>
