@@ -154,11 +154,12 @@
       <!-- SERVICES -->
       <section class="page-section" id="services">
         <div class="page-heading compact">
-          <div><div class="eyebrow">GESTIÓN</div><h1>Servicios</h1><p>Contrataciones, periodos, costos y rentabilidad.</p></div>
-          <button class="primary-button" data-action="new-service"><svg><use href="#i-plus"/></svg>Nuevo servicio</button>
+          <div><div class="eyebrow">GESTIÓN</div><h1>Servicios</h1><p>Contrataciones, periodos, pagos, costos y rentabilidad.</p></div>
+          <div class="heading-actions"><button class="secondary-button" data-action="new-catalog"><svg><use href="#i-grid"/></svg>Catálogo</button><button class="primary-button" data-action="new-service"><svg><use href="#i-plus"/></svg>Nuevo servicio</button></div>
         </div>
         <div class="toolbar"><div class="table-search"><svg><use href="#i-search"/></svg><input id="serviceSearch" placeholder="Buscar servicio o cliente..."></div><select id="serviceStatus"><option value="all">Todos los estados</option><option value="Activo">Activos</option><option value="Pendiente">Pendientes</option><option value="Finalizado">Finalizados</option></select></div>
         <div class="table-panel"><table><thead><tr><th>Servicio</th><th>Cliente</th><th>Periodo</th><th>Precio</th><th>Estado</th><th>Pago</th><th></th></tr></thead><tbody id="servicesTable"></tbody></table></div>
+        <div class="panel catalog-panel"><div class="panel-header"><div><h2>Catálogo de servicios</h2><p>Administra los servicios base sin entrar a Google Sheets.</p></div><button class="secondary-button" data-action="new-catalog"><svg><use href="#i-plus"/></svg>Nuevo</button></div><div class="table-panel inner"><table><thead><tr><th>Servicio</th><th>Periodicidad</th><th>Moneda</th><th>Estado</th><th></th></tr></thead><tbody id="catalogTable"></tbody></table></div></div>
       </section>
 
       <!-- QUOTES -->
@@ -176,10 +177,12 @@
           <div><div class="eyebrow">CONTROL</div><h1>Finanzas</h1><p>Vista interna de ingresos, costos y rentabilidad.</p></div>
         </div>
         <div class="finance-cards">
-          <article class="finance-card"><span>Ventas</span><strong id="financeSales">$0</strong></article>
+          <article class="finance-card"><span>Ventas contratadas</span><strong id="financeSales">$0</strong></article>
           <article class="finance-card"><span>Costos reales</span><strong id="financeCosts">$0</strong></article>
           <article class="finance-card"><span>Ganancia</span><strong id="financeProfit">$0</strong></article>
           <article class="finance-card"><span>Margen promedio</span><strong id="financeMargin">0%</strong></article>
+          <article class="finance-card"><span>Cobrado</span><strong id="financeCollected">$0</strong></article>
+          <article class="finance-card"><span>Pendiente de cobro</span><strong id="financePending">$0</strong></article>
         </div>
         <div class="panel finance-note"><h2>Control interno</h2><p>Los costos de plataformas y la ganancia son información interna. Nunca se muestran en la cotización o resumen que recibe el cliente.</p></div>
       </section>
@@ -205,9 +208,19 @@
       <section class="page-section" id="settings">
         <div class="page-heading compact"><div><div class="eyebrow">SISTEMA</div><h1>Configuración</h1><p>Preferencias básicas de tu gestión freelance.</p></div></div>
         <div class="settings-grid">
-          <div class="panel setting-card"><span>Marca</span><strong>Claudia R.</strong><small>Gestión Freelance</small></div>
-          <div class="panel setting-card"><span>Moneda principal</span><strong>USD</strong><small>Configurable por servicio</small></div>
-          <div class="panel setting-card"><span>Datos</span><strong>Privados</strong><small>La información de clientes se almacenará fuera del repositorio.</small></div>
+          <div class="panel setting-card"><span>Marca</span><strong>Claudia R.</strong><small>Comunicación · Desarrollo Web · Estrategia Digital</small></div>
+          <div class="panel setting-card"><span>Comprobante habitual</span><strong>Recibo por Honorarios</strong><small>La cotización no suma la retención.</small></div>
+          <div class="panel setting-card"><span>Datos</span><strong>Privados</strong><small>La información de clientes se almacena en Google Sheets.</small></div>
+        </div>
+        <div class="panel settings-form-panel">
+          <div class="panel-head"><div><div class="eyebrow">TRIBUTARIO</div><h2>Configuración de RHE</h2><p>Estos valores son internos y no se muestran en las cotizaciones.</p></div></div>
+          <form id="settingsForm" class="form-grid">
+            <label>Comprobante<select name="documentType"><option>Recibo por Honorarios</option></select></label>
+            <label>Tasa de retención (%)<input type="number" name="retentionRate" step="0.01" min="0" value="8"></label>
+            <label>Monto de referencia sin retención<input type="number" name="noRetentionThreshold" step="0.01" min="0" value="1500"></label>
+            <div class="field-note full">La tasa es editable aquí. La retención no se suma a la cotización: se gestiona, cuando corresponda, al emitir y pagar el RHE.</div>
+            <div class="modal-actions full"><button class="primary-button" type="submit">Guardar configuración</button></div>
+          </form>
         </div>
       </section>
 
@@ -216,29 +229,38 @@
 
   <!-- MODAL CLIENTE -->
   <div class="modal-backdrop" id="clientModal">
-    <div class="modal">
-      <div class="modal-head"><div><div class="eyebrow">CLIENTES</div><h2>Nuevo cliente</h2></div><button class="close-button" data-close="clientModal"><svg><use href="#i-close"/></svg></button></div>
+    <div class="modal wide">
+      <div class="modal-head"><div><div class="eyebrow">CLIENTES</div><h2 id="clientModalTitle">Nuevo cliente</h2></div><button class="close-button" data-close="clientModal"><svg><use href="#i-close"/></svg></button></div>
       <form id="clientForm">
+        <input type="hidden" name="clientId" id="clientId">
         <div class="form-grid">
           <label>Nombre / empresa<input name="name" required></label>
+          <label>Tipo de documento<select name="documentType"><option>RUC</option><option>DNI</option><option>Pasaporte</option><option>Otro</option></select></label>
+          <label>Número de documento<input name="document"></label>
+          <label>Persona de contacto<input name="contact"></label>
           <label>Correo<input type="email" name="email"></label>
           <label>Teléfono<input name="phone"></label>
-          <label>RUC / documento<input name="document"></label>
+          <label>País<input name="country" value="Perú"></label>
+          <label>Moneda habitual<select name="currency"><option>USD</option><option>PEN</option></select></label>
+          <label class="full">Dirección<input name="address"></label>
           <label class="full">Notas<textarea name="notes" rows="3"></textarea></label>
         </div>
-        <div class="modal-actions"><button type="button" class="secondary-button" data-close="clientModal">Cancelar</button><button class="primary-button" type="submit">Guardar cliente</button></div>
+        <div class="modal-actions"><button type="button" class="secondary-button" data-close="clientModal">Cancelar</button><button class="primary-button" type="submit"><span id="clientSubmitLabel">Guardar cliente</span></button></div>
       </form>
     </div>
   </div>
 
-  <!-- MODAL SERVICIO -->
+  <!-- MODAL SERVICIO / CONTRATACIÓN -->
   <div class="modal-backdrop" id="serviceModal">
     <div class="modal wide">
-      <div class="modal-head"><div><div class="eyebrow">SERVICIOS</div><h2>Nuevo servicio</h2></div><button class="close-button" data-close="serviceModal"><svg><use href="#i-close"/></svg></button></div>
+      <div class="modal-head"><div><div class="eyebrow">CONTRATACIÓN</div><h2 id="serviceModalTitle">Nuevo servicio</h2></div><button class="close-button" data-close="serviceModal"><svg><use href="#i-close"/></svg></button></div>
       <form id="serviceForm">
+        <input type="hidden" name="serviceId" id="serviceId">
         <div class="form-grid">
           <label>Cliente<select name="clientId" id="serviceClient" required></select></label>
-          <label>Servicio<input name="service" required placeholder="Ej. Gestión Wix"></label>
+          <label>Servicio del catálogo<select name="serviceCatalog" id="serviceCatalog"></select></label>
+          <label>Nombre del servicio<input name="service" required placeholder="Ej. Gestión web mensual"></label>
+          <label>Proveedor<input name="provider" placeholder="Ej. Wix, Google"></label>
           <label class="full">Descripción<input name="description"></label>
           <label>Fecha de inicio<input type="date" name="start" required></label>
           <label>Fecha de fin<input type="date" name="end" required></label>
@@ -246,12 +268,81 @@
           <label>Moneda<select name="currency"><option>USD</option><option>PEN</option></select></label>
           <label>Costo real<input type="number" name="cost" step="0.01" min="0" value="0"></label>
           <label>Precio cliente<input type="number" name="price" step="0.01" min="0" required></label>
+          <label>Comprobante<select name="documentType"><option>Recibo por Honorarios</option></select></label>
+          <label>RHE emitido<select name="rheEmitted"><option>No</option><option>Sí</option></select></label>
+          <label>N.° RHE<input name="rheNumber" placeholder="Ej. E001-123"></label>
+          <label>Fecha RHE<input type="date" name="rheDate"></label>
           <label>Estado servicio<select name="status"><option>Activo</option><option>Pendiente</option><option>Finalizado</option></select></label>
           <label>Estado de pago<select name="payment"><option>Pendiente</option><option>Pagado</option></select></label>
+          <label>Fecha de pago<input type="date" name="paymentDate"></label>
+          <label>Medio de pago<select name="paymentMethod"><option value="">—</option><option>Transferencia</option><option>Yape / Plin</option><option>Tarjeta</option><option>Efectivo</option><option>Otro</option></select></label>
           <label class="full">Notas<textarea name="notes" rows="3"></textarea></label>
         </div>
         <div class="profit-preview"><span>Ganancia interna</span><strong id="profitPreview">$0.00</strong><small>No se muestra al cliente.</small></div>
-        <div class="modal-actions"><button type="button" class="secondary-button" data-close="serviceModal">Cancelar</button><button class="primary-button" type="submit">Guardar servicio</button></div>
+                <div class="modal-actions"><button type="button" class="secondary-button" data-close="serviceModal">Cancelar</button><button class="primary-button" type="submit"><span id="serviceSubmitLabel">Guardar servicio</span></button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL PAGO -->
+  <div class="modal-backdrop" id="paymentModal">
+    <div class="modal">
+      <div class="modal-head"><div><div class="eyebrow">PAGOS</div><h2>Registrar pago</h2><p id="paymentServiceName"></p></div><button class="close-button" data-close="paymentModal"><svg><use href="#i-close"/></svg></button></div>
+      <form id="paymentForm">
+        <input type="hidden" name="serviceId">
+        <div class="form-grid">
+          <label>Estado<select name="payment"><option>Pendiente</option><option>Pagado</option></select></label>
+          <label>Fecha de pago<input type="date" name="paymentDate"></label>
+          <label>Medio de pago<select name="paymentMethod"><option>Transferencia</option><option>Yape / Plin</option><option>Tarjeta</option><option>Efectivo</option><option>Otro</option></select></label>
+          <label class="full">Nota del pago<textarea name="notes" rows="3" placeholder="Referencia, banco, observación, etc."></textarea></label>
+        </div>
+        <div class="modal-actions"><button type="button" class="secondary-button" data-close="paymentModal">Cancelar</button><button class="primary-button" type="submit">Guardar pago</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL CATÁLOGO -->
+  <div class="modal-backdrop" id="catalogModal">
+    <div class="modal wide">
+      <div class="modal-head"><div><div class="eyebrow">CATÁLOGO</div><h2 id="catalogModalTitle">Nuevo servicio del catálogo</h2></div><button class="close-button" data-close="catalogModal"><svg><use href="#i-close"/></svg></button></div>
+      <form id="catalogForm">
+        <input type="hidden" name="catalogId">
+        <div class="form-grid">
+          <label>Nombre del servicio<input name="name" required placeholder="Ej. Diseño y desarrollo web"></label>
+          <label>Proveedor<input name="provider" placeholder="Ej. Wix / Google / Propio"></label>
+          <label class="full">Descripción<input name="description"></label>
+          <label>Periodicidad<select name="periodicity"><option>Mensual</option><option>Trimestral</option><option>Semestral</option><option>Anual</option><option>Único</option><option>Variable</option></select></label>
+          <label>Moneda base<select name="baseCurrency"><option>USD</option><option>PEN</option></select></label>
+          <label>Activo<select name="active"><option>Sí</option><option>No</option></select></label>
+        </div>
+        <div class="modal-actions"><button type="button" class="secondary-button" data-close="catalogModal">Cancelar</button><button class="primary-button" type="submit"><span id="catalogSubmitLabel">Guardar servicio</span></button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL COBRO AGRUPADO -->
+  <div class="modal-backdrop" id="billingModal">
+    <div class="modal wide">
+      <div class="modal-head"><div><div class="eyebrow">COBRO</div><h2>Generar cobro</h2><p id="billingClientName"></p></div><button class="close-button" data-close="billingModal"><svg><use href="#i-close"/></svg></button></div>
+      <form id="billingForm">
+        <input type="hidden" name="clientId">
+        <div class="billing-summary-card">
+          <div><span>Servicios pendientes</span><strong id="billingBaseTotal">$0.00</strong></div>
+          <div><span>Comprobante</span><strong>Recibo por Honorarios</strong></div>
+        </div>
+        <div class="form-grid">
+          <label class="full check-field"><input type="checkbox" id="billingRetentionCheck" name="retention" value="Sí"><span><strong>Aplicar retención RHE</strong><small>Usar la tasa configurada: <b id="billingRateLabel">8%</b></small></span></label>
+          <label>El monto ingresado corresponde a<select name="mode"><option value="gross">Honorario bruto</option><option value="net">Monto neto que quiero recibir</option></select></label>
+          <label id="billingAmountField" style="display:none">Monto neto deseado<input type="number" name="amount" step="0.01" min="0" placeholder="Ej. 2500.00"></label>
+        </div>
+        <div class="billing-calculation">
+          <div><span>Modo</span><strong id="billingModeLabel">Sin retención</strong></div>
+          <div><span>Honorarios</span><strong id="billingGross">$0.00</strong></div>
+          <div><span>Retención RHE</span><strong id="billingRetention">$0.00</strong></div>
+          <div class="billing-total"><span>Neto a pagar</span><strong id="billingNet">$0.00</strong></div>
+        </div>
+        <div class="field-note full" id="billingHint">Sin retención: el total del cobro es igual a la suma de los servicios.</div>
+        <div class="modal-actions"><button type="button" class="secondary-button" data-close="billingModal">Cancelar</button><button class="primary-button" type="submit"><svg><use href="#i-download"/></svg> Generar PDF</button></div>
       </form>
     </div>
   </div>
@@ -267,11 +358,16 @@
           <label>Fecha<input type="date" name="date" required></label>
           <label class="full">Servicio / propuesta<input name="title" required placeholder="Ej. Diseño y desarrollo web"></label>
           <label class="full">Descripción<textarea name="description" rows="4" placeholder="Describe brevemente el alcance para el cliente."></textarea></label>
-          <label>Precio<input type="number" name="price" step="0.01" min="0" required></label>
+          <label>Precio base<input type="number" name="price" step="0.01" min="0" required></label>
           <label>Moneda<select name="currency"><option>USD</option><option>PEN</option></select></label>
+          <label>Comprobante<select name="documentType"><option>Recibo por Honorarios</option></select></label>
+          <div class="field-note full">La cotización define el monto comercial del servicio. La retención RHE se configura únicamente al momento del cobro.</div>
           <label>Validez<input name="validity" value="15 días"></label>
+          <label>Estado<select name="status"><option>Borrador</option><option>Enviada</option><option>Aceptada</option><option>Rechazada</option><option>Vencida</option></select></label>
+          <label class="full">Notas internas<textarea name="notes" rows="2" placeholder="No se muestran al cliente."></textarea></label>
         </div>
-        <div class="quote-private-note">La cotización para el cliente contiene únicamente la información comercial. Los costos internos, ganancia y datos de SUNAT quedan fuera.</div>
+        <div class="tax-preview" id="quoteTaxPreview">Honorarios <strong>$0.00</strong> · Comprobante: Recibo por Honorarios</div>
+        <div class="quote-private-note">El PDF para el cliente contiene únicamente la información comercial. Costos internos, ganancia, RHE y otros datos tributarios internos quedan fuera.</div>
         <div class="modal-actions"><button type="button" class="secondary-button" data-close="quoteModal">Cancelar</button><button class="primary-button" type="submit"><svg><use href="#i-download"/></svg><span id="quoteSubmitLabel">Generar documento</span></button></div>
       </form>
     </div>

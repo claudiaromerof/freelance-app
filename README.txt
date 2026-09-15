@@ -1,21 +1,36 @@
-CLAUDIA RF V1 — CONECTADA A GOOGLE SHEETS
+CLAUDIA RF — V1 PRO · RECIBO POR HONORARIOS
 
-1. En tu Google Sheet, abre Extensiones > Apps Script.
-2. Crea un archivo WebApp.gs y pega backend/WebApp.gs.
-3. Implementa > Nueva implementación > Aplicación web. Ejecutar como: tú. Acceso: cualquiera.
-4. Copia la URL /exec que te dé Apps Script.
-5. Abre js/00-config.js y reemplaza PEGAR_AQUI_URL_WEB_APP por esa URL.
-6. Sube esta carpeta a tu repositorio GitHub Pages.
+Arquitectura
+- GitHub Pages: interfaz web.
+- Google Apps Script: API.
+- Google Sheets: base de datos privada.
 
-El Sheet sigue privado; el sitio no contiene datos de clientes. La API usa un token de acceso para V1. Como GitHub Pages es público, ese token queda visible en el navegador, por lo que sirve como barrera básica, no como autenticación fuerte. Para una versión posterior realmente privada se recomienda autenticación de Google.
+Lógica tributaria de la app
+- El comprobante habitual es Recibo por Honorarios.
+- La cotización NO suma IGV.
+- La cotización NO descuenta ni suma la retención.
+- La retención se gestiona internamente al emitir/pagar el RHE, cuando corresponda.
+- Configuración editable desde la sección Configuración de la app:
+  - tasa de retención (por defecto 8%)
+  - monto de referencia sin retención (por defecto S/ 1,500)
+- El porcentaje y los umbrales deben revisarse según la situación tributaria vigente.
 
-Token generado para esta versión:
-CM39nAfl8dCkEZhYUJ9JImhKnIz_Ma_TYqaSlRSFUyQ
+Gestión desde la app
+- Clientes: crear y editar.
+- Servicios/contrataciones: crear y editar.
+- Estado de pago: Pendiente/Pagado, fecha y medio.
+- RHE: emitido/no, número, fecha y retención interna estimada.
+- Cotizaciones: crear, editar y generar PDF.
+- Cobros: un solo PDF por cliente con todos los servicios pendientes/activos, cada uno con su propio periodo.
+- Finanzas: costo, precio, ganancia y cobrado/pendiente.
 
+IMPORTANTE — Apps Script
+1. Copiar backend/WebApp.gs al proyecto de Google Apps Script.
+2. Guardar.
+3. Implementar > Administrar implementaciones > Editar > Nueva versión.
+4. Ejecutar como: tú.
+5. Acceso: cualquiera.
+6. Mantener la URL /exec existente.
 
-PASO BACKEND ACTUALIZADO:
-Copia backend/WebApp.gs completo a tu proyecto de Google Apps Script y vuelve a implementar una nueva versión.
-SERVICIOS se conserva como catálogo; state.services representa CONTRATACIONES y resuelve el nombre mediante ID_SERVICIO.
-
-COBROS:
-Cada servicio conserva su propio periodo. Si todos coinciden, el documento muestra un periodo general; si difieren, muestra "Periodos según cada servicio" y cada fila conserva sus fechas.
+Al guardar desde la app, el backend crea/actualiza la hoja CONFIGURACION automáticamente.
+Las columnas antiguas TIPO_IGV/TASA_IGV se conservan solo para compatibilidad histórica; la aplicación ya no las usa.

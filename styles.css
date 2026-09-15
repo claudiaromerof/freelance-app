@@ -310,3 +310,34 @@ tbody tr:hover{background:#fafaf7}
 }
 
 .quote-actions-inline{display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap;}
+
+.table-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.table-actions .secondary-button,
+.table-actions .service-download {
+  white-space: nowrap;
+}
+
+/* =========================================================
+   PRO — GESTIÓN, PAGOS, CATÁLOGO E IGV
+   ========================================================= */
+.heading-actions{display:flex;align-items:center;gap:10px}
+.catalog-panel{margin-top:18px;overflow:hidden}
+.table-panel.inner{border:0;border-radius:0;box-shadow:none;background:transparent}
+.table-panel.inner table{margin:0}
+.tax-preview{margin-top:16px;padding:13px 15px;border:1px solid #dfe3dd;border-radius:10px;background:#f4f6f2;color:#59625c;font-size:12px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.tax-preview strong{color:#202722;font-weight:700}
+.table-secondary{font-size:10px;color:#7a817c;margin-top:3px}
+.quote-card .status{margin-left:4px}
+@media(max-width:800px){.heading-actions{width:100%;flex-direction:column}.heading-actions button{width:100%}.catalog-panel .panel-header{align-items:flex-start;gap:10px}.table-panel.inner{overflow-x:auto}}
+
+.field-note{font-size:12px;line-height:1.55;color:#6d6d68;padding:10px 0}.settings-form-panel{margin-top:20px;padding:24px}.settings-form-panel .panel-head{margin-bottom:18px}.settings-form-panel .panel-head h2{margin:4px 0}.settings-form-panel .panel-head p{margin:0;color:#777}
+
+
+/* COBRO PRO */
+.billing-summary-card{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0;padding:16px;border:1px solid #e3e0d9;border-radius:12px;background:#f8f7f3}.billing-summary-card span,.billing-calculation span{display:block;font-size:10px;text-transform:uppercase;letter-spacing:1.2px;color:#777;margin-bottom:6px}.billing-summary-card strong{font-size:18px}.check-field{display:flex!important;flex-direction:row!important;align-items:center;gap:12px;padding:14px;border:1px solid #dedbd4;border-radius:10px;background:#fbfaf7}.check-field input{width:18px;height:18px;accent-color:#405a4f}.check-field span{display:flex;flex-direction:column;gap:3px}.check-field small{font-size:11px;color:#777}.billing-calculation{margin-top:18px;border:1px solid #dedbd4;border-radius:12px;padding:16px;display:grid;gap:10px}.billing-calculation>div{display:flex;justify-content:space-between;align-items:center;padding:5px 0}.billing-calculation .billing-total{border-top:2px solid #405a4f;margin-top:5px;padding-top:14px;font-size:18px}.billing-calculation .billing-total strong{font-size:21px}@media(max-width:700px){.billing-summary-card{grid-template-columns:1fr}}

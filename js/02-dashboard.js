@@ -53,7 +53,7 @@ function renderDashboard() {
       .filter(service => {
 
         const date =
-          new Date(`${service.start}T12:00:00`);
+          new Date(`${service.paymentDate || service.start}T12:00:00`);
 
         return (
           date.getMonth() === currentMonth &&
