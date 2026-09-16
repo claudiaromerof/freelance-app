@@ -175,17 +175,40 @@
       <!-- FINANCE -->
       <section class="page-section" id="finance">
         <div class="page-heading compact">
-          <div><div class="eyebrow">CONTROL</div><h1>Finanzas</h1><p>Vista interna de ingresos, costos y rentabilidad.</p></div>
+          <div><div class="eyebrow">CONTROL</div><h1>Finanzas</h1><p>Vista interna para saber cuánto vendes, cuánto ganas y qué servicios necesitan revisión.</p></div>
+          <div class="finance-period-control"><label for="financePeriod">Ejercicio</label><select id="financePeriod"><option value="all">Todos los periodos</option></select></div>
         </div>
-        <div class="finance-cards">
-          <article class="finance-card"><span>Ventas contratadas</span><strong id="financeSales">$0</strong></article>
-          <article class="finance-card"><span>Costos reales</span><strong id="financeCosts">$0</strong></article>
-          <article class="finance-card"><span>Ganancia</span><strong id="financeProfit">$0</strong></article>
-          <article class="finance-card"><span>Margen promedio</span><strong id="financeMargin">0%</strong></article>
-          <article class="finance-card"><span>Cobrado</span><strong id="financeCollected">$0</strong></article>
-          <article class="finance-card"><span>Pendiente de cobro</span><strong id="financePending">$0</strong></article>
+
+        <div class="finance-cards finance-main-cards">
+          <article class="finance-card"><span>Ingresos contratados</span><strong id="financeSales">$0</strong><small id="financeSalesSub">—</small></article>
+          <article class="finance-card"><span>Cobrado</span><strong id="financeCollected">$0</strong><small id="financeCollectionSub">—</small></article>
+          <article class="finance-card"><span>Por cobrar</span><strong id="financePending">$0</strong><small id="financePendingSub">—</small></article>
+          <article class="finance-card"><span>Ganancia estimada</span><strong id="financeProfit">$0</strong><small id="financeProfitSub">—</small></article>
         </div>
-        <div class="panel finance-note"><h2>Control interno</h2><p>Los costos de plataformas y la ganancia son información interna. Nunca se muestran en la cotización o resumen que recibe el cliente.</p></div>
+
+        <div class="finance-section-grid">
+          <article class="panel finance-analysis">
+            <div class="panel-header"><div><h2>Rentabilidad</h2><p>El margen se calcula por moneda para no mezclar soles con dólares.</p></div></div>
+            <div class="finance-kpis">
+              <div class="finance-kpi"><span>Margen promedio</span><strong id="financeMargin">0%</strong></div>
+              <div class="finance-kpi"><span>Costos reales</span><strong id="financeCosts">$0</strong></div>
+              <div class="finance-kpi"><span>Costo sobre ventas</span><strong id="financeCostRatio">0%</strong></div>
+              <div class="finance-kpi"><span>% cobrado</span><strong id="financeCollectionRate">0%</strong></div>
+              <div class="finance-kpi"><span>Ganancia recurrente anual</span><strong id="financeRecurringProfit">—</strong></div>
+            </div>
+            <div class="finance-legend"><span><i class="margin-dot healthy"></i><b id="financeHealthyLabel">30%+</b> saludable</span><span><i class="margin-dot review"></i><b id="financeReviewLabel">20–29%</b> revisar</span><span><i class="margin-dot low"></i><b id="financeLowLabel">10–19%</b> bajo</span><span><i class="margin-dot danger"></i><b id="financeDangerLabel">&lt;10%</b> crítico</span></div>
+          </article>
+
+          <article class="panel finance-review-panel">
+            <div class="panel-header"><div><h2>Servicios a revisar</h2><p>Detecta márgenes bajos o negativos antes de renovar.</p></div></div>
+            <div id="financeReviewList" class="finance-review-list"></div>
+          </article>
+        </div>
+
+        <div class="panel finance-note">
+          <div><div class="eyebrow">CONTROL INTERNO</div><h2>Cómo leer tus números</h2></div>
+          <p><strong>Ganancia estimada</strong> = ingresos contratados − costos reales. La <strong>retención RHE</strong> no se trata como costo del servicio: cuando se registre un cobro con retención, se mostrará aparte del resultado comercial.</p>
+        </div>
       </section>
 
       <!-- HISTORY -->
@@ -218,6 +241,8 @@
           <form id="settingsForm" class="form-grid">
             <label>Comprobante<select name="documentType"><option>Recibo por Honorarios</option></select></label>
             <label>Tasa de retención (%)<input type="number" name="retentionRate" step="0.01" min="0" value="8"></label>
+            <label>Margen mínimo (%)<input type="number" name="marginMinimum" step="1" min="0" max="100" value="20"><small class="field-help">Alerta cuando un servicio queda por debajo.</small></label>
+            <label>Margen objetivo (%)<input type="number" name="marginTarget" step="1" min="0" max="100" value="25"><small class="field-help">Referencia para tus decisiones de precio.</small></label>
             <label>Monto de referencia sin retención<input type="number" name="noRetentionThreshold" step="0.01" min="0" value="1500"></label>
             <div class="field-note full">La tasa es editable aquí. La retención se configura únicamente al momento del cobro.</div>
             <div class="settings-subhead full">Datos para recibir pagos</div>
@@ -283,7 +308,7 @@
           <label>Estado<select name="status"><option>Activo</option><option>Pendiente</option><option>Finalizado</option></select></label>
           <label class="full">Notas internas<textarea name="notes" rows="3" placeholder="Opcional"></textarea></label>
         </div>
-        <div class="profit-preview"><span>Ganancia interna</span><strong id="profitPreview">$0.00</strong><small>No se muestra al cliente.</small></div>
+        <div class="profit-preview service-finance-preview"><div><span>Ganancia interna</span><strong id="profitPreview">$0.00</strong></div><div><span>Margen</span><strong id="marginPreview">0%</strong></div><div><span>Precio mínimo</span><strong id="minimumPricePreview">$0.00</strong></div><small id="pricingHint">Calculado con tu margen mínimo configurado.</small></div>
         <div class="modal-actions"><button type="button" class="secondary-button" data-close="serviceModal">Cancelar</button><button class="primary-button" type="submit"><span id="serviceSubmitLabel">Guardar servicio</span></button></div>
       </form>
     </div>
@@ -323,7 +348,7 @@
           <label>Cobro al cliente<input type="number" name="price" step="0.01" min="0" required></label>
           <label class="full">Notas internas<textarea name="notes" rows="3" placeholder="Opcional"></textarea></label>
         </div>
-        <div class="profit-preview"><span>Ganancia interna</span><strong id="renewalProfitPreview">$0.00</strong><small>No se muestra al cliente.</small></div>
+        <div class="profit-preview service-finance-preview"><div><span>Ganancia interna</span><strong id="renewalProfitPreview">$0.00</strong></div><div><span>Margen</span><strong id="renewalMarginPreview">0%</strong></div><div><span>Precio mínimo</span><strong id="renewalMinimumPricePreview">$0.00</strong></div><small>Referencia para decidir el nuevo precio.</small></div>
         <div class="field-note full renewal-note">Al renovar, el periodo anterior no se modifica en precio. Se cierra su estado y se crea un nuevo registro con <strong>pago pendiente</strong>.</div>
         <div class="modal-actions"><button type="button" class="secondary-button" data-close="renewalModal">Cancelar</button><button class="primary-button" type="submit">Crear renovación</button></div>
       </form>

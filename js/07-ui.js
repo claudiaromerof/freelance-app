@@ -204,7 +204,11 @@ function openRenewalModal(id) {
 $("#renewalForm")?.addEventListener('input', updateRenewalPreview);
 $("#renewalForm")?.addEventListener('change', updateRenewalPreview);
 function updateRenewalPreview(){
-  const f=$("#renewalForm"); if(!f)return; const total=Number(f.elements.price.value||0)*Number(f.elements.quantity.value||1); const cost=Number(f.elements.cost.value||0)*Number(f.elements.quantity.value||1); $("#renewalProfitPreview").textContent=money(total-cost,f.elements.currency.value||'USD');
+  const f=$("#renewalForm"); if(!f)return;
+  const a=pricingAnalysis(f.elements.cost.value,f.elements.price.value,f.elements.quantity.value,f.elements.currency.value||'USD');
+  $("#renewalProfitPreview").textContent=money(a.profit,a.currency);
+  $("#renewalMarginPreview").textContent=`${(a.margin*100).toFixed(1)}%`;
+  $("#renewalMinimumPricePreview").textContent=money(a.minimumPrice,a.currency);
 }
 $("#renewalForm")?.addEventListener('submit', async event=>{
   event.preventDefault(); const form=event.currentTarget; const data=Object.fromEntries(new FormData(form).entries()); const oldService=state.services.find(s=>s.id===data.serviceId); if(!oldService)return toast('No se encontró el servicio.');
@@ -338,6 +342,8 @@ $("#settingsForm")?.addEventListener("submit", async event => {
   state.settings = {
     documentType: "Recibo por Honorarios",
     retentionRate: Number(data.retentionRate || 8),
+    marginMinimum: Number(data.marginMinimum || 20),
+    marginTarget: Number(data.marginTarget || 25),
     noRetentionThreshold: Number(data.noRetentionThreshold || 1500),
     paymentHolder: data.paymentHolder?.trim() || "Claudia Romero Fonseca",
     bankUSD: data.bankUSD?.trim() || "", accountUSD: data.accountUSD?.trim() || "", cciUSD: data.cciUSD?.trim() || "",
@@ -361,6 +367,8 @@ function populateSettingsForm() {
   const cfg = currentSettings();
   form.elements.documentType.value = "Recibo por Honorarios";
   form.elements.retentionRate.value = cfg.retentionRate ?? 8;
+  form.elements.marginMinimum.value = cfg.marginMinimum ?? 20;
+  form.elements.marginTarget.value = cfg.marginTarget ?? 25;
   form.elements.noRetentionThreshold.value = cfg.noRetentionThreshold ?? 1500;
   form.elements.paymentHolder.value = cfg.paymentHolder || "Claudia Romero Fonseca";
   form.elements.bankUSD.value = cfg.bankUSD || ""; form.elements.accountUSD.value = cfg.accountUSD || ""; form.elements.cciUSD.value = cfg.cciUSD || "";

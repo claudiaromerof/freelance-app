@@ -188,10 +188,29 @@ function openCatalogEditor(id) {
   openModal("catalogModal");
 }
 
+function pricingAnalysis(cost, price, quantity, currency) {
+  const qty = Number(quantity || 1);
+  const totalCost = Number(cost || 0) * qty;
+  const totalPrice = Number(price || 0) * qty;
+  const profit = totalPrice - totalCost;
+  const margin = totalPrice ? profit / totalPrice : 0;
+  const minimum = Number(currentSettings().marginMinimum ?? 20) / 100;
+  const target = Number(currentSettings().marginTarget ?? 25) / 100;
+  const minimumPrice = totalCost / Math.max(0.01, 1 - minimum);
+  const targetPrice = totalCost / Math.max(0.01, 1 - target);
+  return { totalCost, totalPrice, profit, margin, minimumPrice, targetPrice, currency };
+}
+
 function updateProfitPreview() {
   const form = $("#serviceForm"); if (!form) return;
-  const profit = (Number(form.elements.price.value || 0) - Number(form.elements.cost.value || 0)) * Number(form.elements.quantity.value || 1);
-  $("#profitPreview").textContent = money(profit, form.elements.currency.value || "USD");
+  const a = pricingAnalysis(form.elements.cost.value, form.elements.price.value, form.elements.quantity.value, form.elements.currency.value || "USD");
+  $("#profitPreview").textContent = money(a.profit, a.currency);
+  $("#marginPreview").textContent = `${(a.margin * 100).toFixed(1)}%`;
+  $("#minimumPricePreview").textContent = money(a.minimumPrice, a.currency);
+  const hint = $("#pricingHint");
+  if (hint) hint.textContent = `Mínimo ${(Number(currentSettings().marginMinimum ?? 20)).toFixed(0)}% · objetivo ${money(a.targetPrice, a.currency)} (${(Number(currentSettings().marginTarget ?? 25)).toFixed(0)}%)`;
+  const marginEl = $("#marginPreview");
+  if (marginEl) marginEl.className = `margin-preview-value ${a.margin < 0 ? "negative-text" : a.margin < Number(currentSettings().marginMinimum ?? 20)/100 ? "low-text" : ""}`;
 }
 
 ["price","cost","quantity","currency"].forEach(name => {

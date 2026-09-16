@@ -28,3 +28,6 @@ Cada acción guarda solamente el documento afectado en Firestore. Esto evita la 
 
 ### Privacidad
 Los datos reales viven en Firestore. El repositorio contiene código de la interfaz y la configuración pública de Firebase; no contiene datos de clientes. El acceso a Firestore depende de las reglas de seguridad configuradas en Firebase.
+
+### Finanzas V1.3
+La sección Finanzas usa el periodo de las contrataciones para permitir revisar ejercicios como 2025-2026 y 2026-2027. Los porcentajes se calculan por moneda. El sistema usa el margen mínimo y objetivo configurados para alertar sobre servicios que requieren revisión y para mostrar un precio mínimo de referencia al crear o renovar una contratación.

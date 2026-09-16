@@ -9,7 +9,7 @@ const demoState = {
   ],
   services: [],
   quotes: [],
-  settings: { documentType:"Recibo por Honorarios", retentionRate:8, noRetentionThreshold:1500, paymentHolder:"Claudia Romero Fonseca", bankUSD:"", accountUSD:"", cciUSD:"", bankPEN:"", accountPEN:"", cciPEN:"", mobilePayment:"" }
+  settings: { documentType:"Recibo por Honorarios", retentionRate:8, marginMinimum:20, marginTarget:25, noRetentionThreshold:1500, paymentHolder:"Claudia Romero Fonseca", bankUSD:"", accountUSD:"", cciUSD:"", bankPEN:"", accountPEN:"", cciPEN:"", mobilePayment:"" }
 };
 
 let state = loadState();
