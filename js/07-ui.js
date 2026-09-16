@@ -140,7 +140,7 @@ $("#paymentForm")?.addEventListener('submit', async event => {
   if (data.notes?.trim()) service.notes = data.notes.trim();
   setFormSaving(form, true);
   try {
-    await apiRegisterPayment({contractIds:[service.id], fechaPago:service.paymentDate, medioPago:service.paymentMethod});
+    await apiRegisterPayment({contractIds:[service.id], payment:data.payment, fechaPago:service.paymentDate, medioPago:service.paymentMethod});
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); refreshAll(); closeModal('paymentModal'); showSection('services'); toast(data.payment==='Pagado'?'Pago registrado correctamente.':'Pago actualizado correctamente.');
   } catch(error) { state=old; refreshAll(); toast(error?.message || 'No se pudo registrar el pago.'); }
   finally { setFormSaving(form, false); }
