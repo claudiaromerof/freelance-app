@@ -269,7 +269,6 @@
       </div>
       <form id="serviceForm">
         <input type="hidden" name="serviceId" id="serviceId">
-        <input type="hidden" name="renewalFromId" id="renewalFromId">
         <div class="form-grid service-simple-grid">
           <label>Cliente<select name="clientId" id="serviceClient" required></select></label>
           <label>Servicio<select name="serviceCatalog" id="serviceCatalog" required></select></label>
@@ -380,8 +379,9 @@
 
   <div class="toast" id="toast"></div>
   <script src="js/00-config.js" defer></script>
-    <script src="js/00-api.js" defer></script>
-    <script src="js/01-core.js" defer></script>
+  <script src="js/00-api.js" defer></script>
+  <script src="js/00-auth-ui.js" defer></script>
+  <script src="js/01-core.js" defer></script>
   <script src="js/02-dashboard.js" defer></script>
   <script src="js/03-clients.js" defer></script>
   <script src="js/04-services.js" defer></script>

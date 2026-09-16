@@ -1,7 +1,11 @@
-# Claudia RF V1 — Frontend conectado a Backend V2
+# CRF Freelance — Firebase V1
 
-Versión preparada para el Google Sheet nuevo y acceso mediante PIN.
+Migración de la aplicación a Firebase Authentication + Cloud Firestore.
 
-PIN de acceso: 5378
+- Login con Google.
+- Firestore para clientes, servicios, contrataciones, cotizaciones y cobros.
+- Sin PIN ni token de Apps Script en el frontend.
+- Mantiene la interfaz modular existente.
+- PDF CRF actualizado a diseño editorial minimalista y bloque RHE tipo SUNAT.
 
-El PIN no está escrito en el frontend; se introduce al abrir la aplicación y se conserva en `sessionStorage`.
+Ver `SETUP-FIREBASE.md` antes de publicar.

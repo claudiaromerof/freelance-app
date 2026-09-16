@@ -32,21 +32,40 @@ function normalizeState(parsed) {
     catalog: Array.isArray(parsed?.catalog) ? parsed.catalog : structuredClone(demoState.catalog),
     services: Array.isArray(parsed?.services) ? parsed.services : [],
     quotes: Array.isArray(parsed?.quotes) ? parsed.quotes : [],
+    billing: Array.isArray(parsed?.billing) ? parsed.billing : [],
     settings: { ...demoState.settings, ...(parsed?.settings || {}) }
   };
 }
 
 async function loadRealState() {
-  if (!apiConfigured()) throw new Error("API no configurada");
-  const remote = await apiGet();
-  state = normalizeState(remote);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  return true;
+  if (!window.CRF_FIREBASE_READY) return false;
+  try {
+    const remote = await apiGet();
+    state = normalizeState(remote);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    return true;
+  } catch (error) {
+    console.error("No se pudo cargar Firebase:", error);
+    toast("No se pudo conectar con Firebase.");
+    return false;
+  }
 }
 
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  return Promise.resolve();
+  if (!window.CRF_FIREBASE_READY) return Promise.resolve();
+
+  const snapshot = structuredClone(state);
+  saveQueue = saveQueue.then(async () => {
+    try {
+      await apiSave(snapshot);
+    } catch (error) {
+      console.error("No se pudo guardar en Firebase:", error);
+      toast("No se pudo guardar el cambio en Firebase.");
+      throw error;
+    }
+  });
+  return saveQueue;
 }
 
 function $(selector) { return document.querySelector(selector); }

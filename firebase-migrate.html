@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CRF — Migración</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f7f5f0;color:#171717;margin:0;padding:40px}.card{max-width:720px;margin:auto;background:#fffefa;border:1px solid #ddd9d0;padding:32px}h1{font-family:Georgia,serif;font-weight:400}label{display:block;margin:16px 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:1px;color:#777}input{width:100%;padding:12px;box-sizing:border-box;border:1px solid #ccc}button{margin-top:20px;padding:13px 18px;background:#171717;color:white;border:0;cursor:pointer}.status{margin-top:20px;white-space:pre-wrap;font-size:13px;line-height:1.6}
+</style>
+</head><body>
+<div class="card">
+<h1>CRF — Migración a Firebase</h1>
+<p>Herramienta de uso local/temporal para copiar tus datos actuales de Apps Script a Firestore. No pongas estos datos en GitHub.</p>
+<label>URL de Apps Script actual</label><input id="url" placeholder="https://script.google.com/macros/s/.../exec">
+<label>PIN actual de Apps Script</label><input id="pin" type="password" placeholder="PIN">
+<button id="go">Migrar datos</button>
+<div class="status" id="status"></div>
+</div>
+<script type="module">
+import { db } from './js/firebase.js';
+import { doc, setDoc } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js';
+import { auth, loginWithGoogle } from './js/firebase.js';
+const $=id=>document.getElementById(id);
+function jsonp(url, params={}){return new Promise((resolve,reject)=>{const cb='crf_mig_'+Date.now()+'_'+Math.random().toString(36).slice(2);const s=document.createElement('script');const q=new URLSearchParams({...params,callback:cb});let done=false;const clean=()=>{done=true;delete window[cb];s.remove()};const t=setTimeout(()=>{if(!done){clean();reject(new Error('Timeout consultando Apps Script'))}},15000);window[cb]=d=>{clearTimeout(t);if(done)return;clean();d?.ok?resolve(d.data??d):reject(new Error(d?.error||'Apps Script devolvió un error'))};s.onerror=()=>{clearTimeout(t);if(!done){clean();reject(new Error('No se pudo cargar Apps Script'))}};s.src=url+'?'+q.toString();document.head.appendChild(s)})}
+$('go').onclick=async()=>{const status=$('status');status.textContent='Iniciando…';try{if(!auth.currentUser) await loginWithGoogle();const url=$('url').value.trim();const pin=$('pin').value.trim();if(!url||!pin)throw new Error('Completa URL y PIN.');const state=await jsonp(url,{action:'state',pin});const collections={clientes:state.clients||[],servicios:state.serviceCatalog||[],contrataciones:state.contracts||[],cotizaciones:state.quotes||[],cobros:state.billing||[]};for(const [name,rows] of Object.entries(collections)){status.textContent+=`\nMigrando ${name}: ${rows.length}`;for(const r of rows){const id=r.id||r.ID_CLIENTE||r.ID_SERVICIO||r.ID_CONTRATACION||r.ID_COTIZACION;if(!id)continue;await setDoc(doc(db,name,id),r,{merge:true})}}if(state.settings) await setDoc(doc(db,'configuracion','principal'),state.settings,{merge:true});status.textContent+='\n\nMigración terminada. Verifica los datos en Firestore antes de retirar Apps Script.'}catch(e){console.error(e);status.textContent='ERROR: '+(e.message||e)}};
+</script>
+</body></html>
