@@ -20,14 +20,18 @@ function renderServices() {
       <td><span class="status ${paymentClass}">${escapeHtml(service.payment)}</span>${service.paymentDate ? `<div class="table-secondary">${formatDate(service.paymentDate)}</div>` : ""}</td>
       <td><div class="table-actions">
         <button class="secondary-button" data-edit-service="${escapeHtml(service.id)}">Editar</button>
+        ${['Mensual','Trimestral','Semestral','Anual'].includes(getCatalogItem(service.serviceId)?.periodicity) ? `<button class="service-download" data-renew-service="${escapeHtml(service.id)}">Renovar</button>` : ''}
         ${service.payment === "Pagado" ? `<button class="service-download" data-payment-service="${escapeHtml(service.id)}">Pago</button>` : `<button class="service-download" data-payment-service="${escapeHtml(service.id)}">Registrar pago</button>`}
         <button class="service-download" data-billing-client="${escapeHtml(service.clientId)}">${icon("i-download")} Cobro</button>
+        <button class="service-download danger-button" data-delete-service="${escapeHtml(service.id)}">Eliminar</button>
       </div></td>
     </tr>`;
   }).join("") : `<tr><td colspan="7"><div class="empty-state">No hay servicios que coincidan.</div></td></tr>`;
 
   $$('[data-edit-service]').forEach(btn => btn.addEventListener("click", () => openServiceEditor(btn.dataset.editService)));
+  $$('[data-renew-service]').forEach(btn => btn.addEventListener("click", () => openRenewalModal(btn.dataset.renewService)));
   $$('[data-payment-service]').forEach(btn => btn.addEventListener("click", () => openPaymentEditor(btn.dataset.paymentService)));
+  $$('[data-delete-service]').forEach(btn => btn.addEventListener("click", () => deleteContract(btn.dataset.deleteService)));
   $$('[data-billing-client]').forEach(btn => btn.addEventListener("click", () => openBillingModal(btn.dataset.billingClient)));
   renderCatalog();
 }
@@ -40,10 +44,11 @@ function renderCatalog() {
     <td><div class="table-primary">${escapeHtml(item.name)}</div><div class="table-secondary">${escapeHtml(item.provider || "")}</div></td>
     <td>${escapeHtml(item.periodicity || "—")}</td>
     <td>${escapeHtml(item.baseCurrency || "USD")}</td>
-    <td><span class="status ${item.active === "Sí" ? "" : "done"}">${escapeHtml(item.active || "Sí")}</span></td>
-    <td><button class="secondary-button" data-edit-catalog="${escapeHtml(item.id)}">Editar</button></td>
+    <td><span class="status ${item.active === "Sí" ? "" : "done"}">${item.active === "Sí" ? "Disponible" : "No disponible"}</span></td>
+    <td><div class="table-actions"><button class="secondary-button" data-edit-catalog="${escapeHtml(item.id)}">Editar</button><button class="service-download danger-button" data-delete-catalog="${escapeHtml(item.id)}">Eliminar</button></div></td>
   </tr>`).join("") : `<tr><td colspan="5"><div class="empty-state">Sin servicios en el catálogo.</div></td></tr>`;
   $$('[data-edit-catalog]').forEach(btn => btn.addEventListener("click", () => openCatalogEditor(btn.dataset.editCatalog)));
+  $$('[data-delete-catalog]').forEach(btn => btn.addEventListener("click", () => deleteCatalog(btn.dataset.deleteCatalog)));
 }
 
 function populateCatalogSelect() {

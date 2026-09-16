@@ -52,20 +52,10 @@ async function loadRealState() {
 }
 
 function saveState() {
+  // Compatibilidad con V1. Las operaciones CRUD nuevas escriben directamente
+  // el documento afectado en Firestore para evitar guardar toda la base cada vez.
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  if (!window.CRF_FIREBASE_READY) return Promise.resolve();
-
-  const snapshot = structuredClone(state);
-  saveQueue = saveQueue.then(async () => {
-    try {
-      await apiSave(snapshot);
-    } catch (error) {
-      console.error("No se pudo guardar en Firebase:", error);
-      toast("No se pudo guardar el cambio en Firebase.");
-      throw error;
-    }
-  });
-  return saveQueue;
+  return Promise.resolve();
 }
 
 function $(selector) { return document.querySelector(selector); }

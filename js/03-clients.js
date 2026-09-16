@@ -13,6 +13,7 @@ function renderClients() {
       <td>${latest ? formatDate(latest.start) : "—"}</td>
       <td><div class="table-actions">
         <button class="secondary-button" data-edit-client="${escapeHtml(client.id)}">Editar</button>
+        <button class="service-download danger-button" data-delete-client="${escapeHtml(client.id)}">Eliminar</button>
         <button class="service-download" data-billing-client="${escapeHtml(client.id)}">${icon("i-download")} Cobro</button>
       </div></td>
     </tr>`;
@@ -20,6 +21,7 @@ function renderClients() {
 
   $$('[data-edit-client]').forEach(btn => btn.addEventListener("click", () => openClientEditor(btn.dataset.editClient)));
   $$('[data-billing-client]').forEach(btn => btn.addEventListener("click", () => openBillingModal(btn.dataset.billingClient)));
+  $$('[data-delete-client]').forEach(btn => btn.addEventListener("click", () => deleteClient(btn.dataset.deleteClient)));
 }
 
 function openClientEditor(id) {

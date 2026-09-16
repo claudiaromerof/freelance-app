@@ -33,7 +33,8 @@ window.CRF_FIREBASE_READY = import("./firebase.js").then(async (mod) => {
     getDocs,
     setDoc,
     addDoc,
-    deleteDoc
+    deleteDoc,
+    writeBatch
   } = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
 
   function firebaseConfigured() {
@@ -138,6 +139,15 @@ window.CRF_FIREBASE_READY = import("./firebase.js").then(async (mod) => {
       paymentDate: normalizeDate(r.paymentDate ?? r.FECHA_PAGO),
       notes: r.notes ?? r.NOTAS ?? "",
       automaticRenewal: r.automaticRenewal ?? r.RENOVACION_AUTOMATICA ?? "No",
+      documentType: r.documentType ?? "Recibo por Honorarios",
+      retentionApplies: r.retentionApplies ?? "Según corresponda",
+      retentionRate: Number(r.retentionRate ?? 8),
+      retentionAmount: Number(r.retentionAmount ?? 0),
+      netReceived: Number(r.netReceived ?? 0),
+      paymentMethod: r.paymentMethod ?? "",
+      rheEmitted: r.rheEmitted ?? "No",
+      rheNumber: r.rheNumber ?? "",
+      rheDate: normalizeDate(r.rheDate) || "",
       renewedFrom: r.renewedFrom ?? ""
     };
   }
@@ -269,19 +279,37 @@ window.CRF_FIREBASE_READY = import("./firebase.js").then(async (mod) => {
       payment: s.payment || "Pendiente",
       paymentDate: s.paymentDate || "",
       notes: s.notes || "",
-      automaticRenewal: s.automaticRenewal || "No"
+      automaticRenewal: s.automaticRenewal || "No",
+      documentType: s.documentType || "Recibo por Honorarios",
+      retentionApplies: s.retentionApplies || "Según corresponda",
+      retentionRate: Number(s.retentionRate || 8),
+      retentionAmount: Number(s.retentionAmount || 0),
+      netReceived: Number(s.netReceived || 0),
+      paymentMethod: s.paymentMethod || "",
+      rheEmitted: s.rheEmitted || "No",
+      rheNumber: s.rheNumber || "",
+      rheDate: s.rheDate || ""
     });
   }
 
   async function apiRenewContract(s) {
+    requireAuth();
     const quantity = Number(s.quantity || 1);
     const cost = Number(s.cost || 0);
     const price = Number(s.price || 0);
     const profit = price * quantity - cost * quantity;
     const margin = price * quantity ? profit / (price * quantity) : 0;
     const newId = s.newId || `CNT-${Date.now()}`;
+    const batch = writeBatch(db);
 
-    return saveDocument("contrataciones", newId, {
+    if (s.previousId) {
+      batch.set(doc(db, "contrataciones", s.previousId), {
+        status: "Finalizado",
+        updatedAt: new Date().toISOString()
+      }, { merge: true });
+    }
+
+    batch.set(doc(db, "contrataciones", newId), cleanObject({
       clientId: s.clientId,
       serviceId: s.serviceId,
       service: s.service,
@@ -295,13 +323,25 @@ window.CRF_FIREBASE_READY = import("./firebase.js").then(async (mod) => {
       currency: s.currency,
       profit,
       margin,
-      status: s.status || "Activo",
+      status: "Activo",
       payment: "Pendiente",
       paymentDate: "",
+      paymentMethod: "",
       notes: s.notes || "",
       automaticRenewal: s.automaticRenewal || "No",
-      renewedFrom: s.id || ""
-    });
+      documentType: s.documentType || "Recibo por Honorarios",
+      retentionApplies: s.retentionApplies || "Según corresponda",
+      retentionRate: Number(s.retentionRate || 8),
+      retentionAmount: 0,
+      netReceived: 0,
+      rheEmitted: "No",
+      rheNumber: "",
+      rheDate: "",
+      renewedFrom: s.previousId || ""
+    }));
+
+    await batch.commit();
+    return { ok: true, id: newId };
   }
 
   async function apiSaveQuote(q) {
@@ -345,8 +385,9 @@ window.CRF_FIREBASE_READY = import("./firebase.js").then(async (mod) => {
     for (const contractId of contractIds) {
       if (!contractId) continue;
       await setDoc(doc(db, "contrataciones", contractId), {
-        payment: "Pagado",
+        payment: p.payment || p.ESTADO_PAGO || "Pagado",
         paymentDate: p.fechaPago || p.FECHA_PAGO || "",
+        paymentMethod: p.medioPago || p.MEDIO_PAGO || "",
         updatedAt: new Date().toISOString()
       }, { merge: true });
     }
@@ -363,6 +404,24 @@ window.CRF_FIREBASE_READY = import("./firebase.js").then(async (mod) => {
       }, { merge: true });
     }
 
+    return { ok: true };
+  }
+
+  async function apiDeleteDocument(name, id) {
+    requireAuth();
+    if (!id) throw new Error("Falta el identificador del registro.");
+    await deleteDoc(doc(db, name, id));
+    return { ok: true, id };
+  }
+
+  async function apiDeleteClient(id) { return apiDeleteDocument("clientes", id); }
+  async function apiDeleteCatalog(id) { return apiDeleteDocument("servicios", id); }
+  async function apiDeleteContract(id) { return apiDeleteDocument("contrataciones", id); }
+  async function apiDeleteQuote(id) { return apiDeleteDocument("cotizaciones", id); }
+
+  async function apiSaveSettings(settings) {
+    requireAuth();
+    await setDoc(doc(db, "configuracion", "principal"), cleanObject(settings || {}), { merge: true });
     return { ok: true };
   }
 
@@ -421,6 +480,11 @@ window.CRF_FIREBASE_READY = import("./firebase.js").then(async (mod) => {
     apiCreateBilling,
     apiRegisterPayment,
     apiSaveQuote,
+    apiDeleteClient,
+    apiDeleteCatalog,
+    apiDeleteContract,
+    apiDeleteQuote,
+    apiSaveSettings,
     apiSave,
     apiRequest
   };
@@ -439,6 +503,11 @@ window.CRF_FIREBASE_READY = import("./firebase.js").then(async (mod) => {
   window.apiCreateBilling = apiCreateBilling;
   window.apiRegisterPayment = apiRegisterPayment;
   window.apiSaveQuote = apiSaveQuote;
+  window.apiDeleteClient = apiDeleteClient;
+  window.apiDeleteCatalog = apiDeleteCatalog;
+  window.apiDeleteContract = apiDeleteContract;
+  window.apiDeleteQuote = apiDeleteQuote;
+  window.apiSaveSettings = apiSaveSettings;
   window.apiSave = apiSave;
   window.apiRequest = apiRequest;
   window.apiConfigured = firebaseConfigured;
@@ -466,5 +535,10 @@ window.apiRenewContract = async (...args) => (await window.CRF_FIREBASE_READY).a
 window.apiCreateBilling = async (...args) => (await window.CRF_FIREBASE_READY).apiCreateBilling(...args);
 window.apiRegisterPayment = async (...args) => (await window.CRF_FIREBASE_READY).apiRegisterPayment(...args);
 window.apiSaveQuote = async (...args) => (await window.CRF_FIREBASE_READY).apiSaveQuote(...args);
+window.apiDeleteClient = async (...args) => (await window.CRF_FIREBASE_READY).apiDeleteClient(...args);
+window.apiDeleteCatalog = async (...args) => (await window.CRF_FIREBASE_READY).apiDeleteCatalog(...args);
+window.apiDeleteContract = async (...args) => (await window.CRF_FIREBASE_READY).apiDeleteContract(...args);
+window.apiDeleteQuote = async (...args) => (await window.CRF_FIREBASE_READY).apiDeleteQuote(...args);
+window.apiSaveSettings = async (...args) => (await window.CRF_FIREBASE_READY).apiSaveSettings(...args);
 window.apiSave = async (...args) => (await window.CRF_FIREBASE_READY).apiSave(...args);
 window.apiRequest = async (...args) => (await window.CRF_FIREBASE_READY).apiRequest(...args);

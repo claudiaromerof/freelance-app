@@ -159,7 +159,7 @@
         </div>
         <div class="toolbar"><div class="table-search"><svg><use href="#i-search"/></svg><input id="serviceSearch" placeholder="Buscar servicio o cliente..."></div><select id="serviceStatus"><option value="all">Todos los estados</option><option value="Activo">Activos</option><option value="Pendiente">Pendientes</option><option value="Finalizado">Finalizados</option></select></div>
         <div class="table-panel"><table><thead><tr><th>Servicio</th><th>Cliente</th><th>Periodo</th><th>Precio</th><th>Estado</th><th>Pago</th><th></th></tr></thead><tbody id="servicesTable"></tbody></table></div>
-        <div class="panel catalog-panel"><div class="panel-header"><div><h2>Catálogo de servicios</h2><p>Administra los servicios base sin entrar a Google Sheets.</p></div><button class="secondary-button" data-action="new-catalog"><svg><use href="#i-plus"/></svg>Nuevo</button></div><div class="table-panel inner"><table><thead><tr><th>Servicio</th><th>Periodicidad</th><th>Moneda</th><th>Estado</th><th></th></tr></thead><tbody id="catalogTable"></tbody></table></div></div>
+        <div class="panel catalog-panel"><div class="panel-header"><div><h2>Catálogo de servicios</h2><p>Servicios que ofreces. Su disponibilidad no depende de ningún cliente.</p></div><button class="secondary-button" data-action="new-catalog"><svg><use href="#i-plus"/></svg>Nuevo</button></div><div class="table-panel inner"><table><thead><tr><th>Servicio</th><th>Periodicidad</th><th>Moneda</th><th>Disponibilidad</th><th></th></tr></thead><tbody id="catalogTable"></tbody></table></div></div>
       </section>
 
       <!-- QUOTES -->
@@ -210,7 +210,7 @@
         <div class="settings-grid">
           <div class="panel setting-card"><span>Marca</span><strong>Claudia R.</strong><small>Comunicación · Desarrollo Web · Estrategia Digital</small></div>
           <div class="panel setting-card"><span>Comprobante habitual</span><strong>Recibo por Honorarios</strong><small>La cotización no suma la retención.</small></div>
-          <div class="panel setting-card"><span>Datos</span><strong>Privados</strong><small>La información de clientes se almacena en Google Sheets.</small></div>
+          <div class="panel setting-card"><span>Datos</span><strong>Privados</strong><small>Clientes, servicios y cobros se almacenan en Firebase.</small></div>
         </div>
         <div class="panel settings-form-panel">
           <div class="panel-head"><div><div class="eyebrow">TRIBUTARIO</div><h2>Configuración de RHE</h2><p>Estos valores son internos y no se muestran en las cotizaciones.</p></div></div>
@@ -305,6 +305,30 @@
     </div>
   </div>
 
+  <!-- MODAL RENOVACIÓN -->
+  <div class="modal-backdrop" id="renewalModal">
+    <div class="modal wide">
+      <div class="modal-head"><div><div class="eyebrow">RENOVACIÓN</div><h2>Renovar servicio</h2><p id="renewalServiceName"></p></div><button class="close-button" data-close="renewalModal"><svg><use href="#i-close"/></svg></button></div>
+      <form id="renewalForm">
+        <input type="hidden" name="serviceId">
+        <div class="renewal-current"><span>Periodo actual</span><strong id="renewalCurrentPeriod">—</strong><small>Este registro se conserva en el historial.</small></div>
+        <div class="form-grid">
+          <div class="field-note full renewal-new-label"><strong>Nuevo periodo</strong><span id="renewalNewPeriodHint">Periodo propuesto</span></div>
+          <label>Fecha de inicio<input type="date" name="newStart" required></label>
+          <label>Fecha de fin<input type="date" name="newEnd" required></label>
+          <label>Cantidad<input type="number" name="quantity" min="1" value="1" required></label>
+          <label>Moneda<select name="currency"><option>USD</option><option>PEN</option></select></label>
+          <label>Costo para mí<input type="number" name="cost" step="0.01" min="0" required></label>
+          <label>Cobro al cliente<input type="number" name="price" step="0.01" min="0" required></label>
+          <label class="full">Notas internas<textarea name="notes" rows="3" placeholder="Opcional"></textarea></label>
+        </div>
+        <div class="profit-preview"><span>Ganancia interna</span><strong id="renewalProfitPreview">$0.00</strong><small>No se muestra al cliente.</small></div>
+        <div class="field-note full renewal-note">Al renovar, el periodo anterior no se modifica en precio. Se cierra su estado y se crea un nuevo registro con <strong>pago pendiente</strong>.</div>
+        <div class="modal-actions"><button type="button" class="secondary-button" data-close="renewalModal">Cancelar</button><button class="primary-button" type="submit">Crear renovación</button></div>
+      </form>
+    </div>
+  </div>
+
   <!-- MODAL CATÁLOGO -->
   <div class="modal-backdrop" id="catalogModal">
     <div class="modal wide">
@@ -317,7 +341,7 @@
           <label class="full">Descripción<input name="description"></label>
           <label>Periodicidad<select name="periodicity"><option>Mensual</option><option>Trimestral</option><option>Semestral</option><option>Anual</option><option>Único</option><option>Variable</option></select></label>
           <label>Moneda base<select name="baseCurrency"><option>USD</option><option>PEN</option></select></label>
-          <label>Activo<select name="active"><option>Sí</option><option>No</option></select></label>
+          <label>Disponibilidad<select name="active"><option>Sí</option><option>No</option></select></label>
         </div>
         <div class="modal-actions"><button type="button" class="secondary-button" data-close="catalogModal">Cancelar</button><button class="primary-button" type="submit"><span id="catalogSubmitLabel">Guardar servicio</span></button></div>
       </form>
@@ -343,7 +367,7 @@
           <div><span>Modo</span><strong id="billingModeLabel">Sin retención</strong></div>
           <div><span>Honorarios</span><strong id="billingGross">$0.00</strong></div>
           <div><span>Retención RHE</span><strong id="billingRetention">$0.00</strong></div>
-          <div class="billing-total"><span>Neto a pagar</span><strong id="billingNet">$0.00</strong></div>
+          <div class="billing-total"><span>Total neto recibido</span><strong id="billingNet">$0.00</strong></div>
         </div>
         <div class="field-note full" id="billingHint">Sin retención: el total del cobro es igual a la suma de los servicios.</div>
         <div class="modal-actions"><button type="button" class="secondary-button" data-close="billingModal">Cancelar</button><button class="primary-button" type="submit"><svg><use href="#i-download"/></svg> Generar PDF</button></div>

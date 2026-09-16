@@ -1,11 +1,30 @@
-# CRF Freelance — Firebase V1
+# CRF Freelance — Firebase V1.1
 
-Migración de la aplicación a Firebase Authentication + Cloud Firestore.
+Aplicación privada de gestión freelance de Claudia R.
 
-- Login con Google.
-- Firestore para clientes, servicios, contrataciones, cotizaciones y cobros.
-- Sin PIN ni token de Apps Script en el frontend.
-- Mantiene la interfaz modular existente.
-- PDF CRF actualizado a diseño editorial minimalista y bloque RHE tipo SUNAT.
+## Flujo principal
 
-Ver `SETUP-FIREBASE.md` antes de publicar.
+**Cliente → Catálogo → Contratación → Cobro/Pago → Historial**
+
+### Catálogo
+Representa lo que Claudia ofrece. “Disponible” significa que puede seleccionarse para nuevas contrataciones. No representa el estado de ningún cliente.
+
+### Contratación
+Es el servicio concreto de un cliente. Aquí sí existe estado del servicio, periodo, costo interno, precio al cliente y estado del pago.
+
+### Renovación
+Para servicios mensuales, trimestrales, semestrales o anuales se usa **Renovar**. La app propone el siguiente periodo a partir del periodo anterior y permite cambiar costo y precio. Al confirmar:
+
+1. el periodo anterior queda Finalizado;
+2. se crea un nuevo registro;
+3. el nuevo precio/costo se guardan como valores propios de ese periodo;
+4. el pago del nuevo periodo queda Pendiente;
+5. el periodo anterior permanece en Historial.
+
+La app no crea renovaciones automáticamente porque necesitaría inventar el costo real y el precio que Claudia cobrará al cliente.
+
+### Guardado
+Cada acción guarda solamente el documento afectado en Firestore. Esto evita la espera que producía el guardado masivo de toda la base.
+
+### Privacidad
+Los datos reales viven en Firestore. El repositorio contiene código de la interfaz y la configuración pública de Firebase; no contiene datos de clientes. El acceso a Firestore depende de las reglas de seguridad configuradas en Firebase.

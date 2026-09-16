@@ -345,3 +345,41 @@ tbody tr:hover{background:#fafaf7}
 
 /* V1 PRO — formularios simplificados y marca */
 .modal-brand-row{display:flex;align-items:center;gap:14px}.modal-crf{width:42px;height:42px;border-radius:10px;background:#1d5f50;color:#fff;display:grid;place-items:center;font-family:var(--serif);font-size:20px;letter-spacing:-2px}.service-simple-grid{margin-top:6px}.settings-subhead{margin-top:8px;padding-top:18px;border-top:1px solid #e1e3df;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;color:#626a65}
+
+/* V1.1 — feedback de guardado, acciones y renovación */
+body.modal-open{overflow:hidden}
+.modal-backdrop.open .modal{animation:modalIn .18s ease-out}
+@keyframes modalIn{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:none}}
+.primary-button:disabled,.secondary-button:disabled{opacity:.58;cursor:wait;transform:none!important}
+.primary-button.is-saving{min-width:145px}
+.button-spinner{width:15px;height:15px;border:2px solid rgba(255,255,255,.38);border-top-color:#fff;border-radius:50%;animation:spin .65s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.danger-button{color:#7b443c!important;border-color:#d8c6c2!important}
+.danger-button:hover{background:#faf3f1!important;border-color:#bda59f!important}
+.renewal-current{padding:15px 16px;border:1px solid #dedfd9;border-radius:11px;background:#f7f6f2;margin-bottom:16px}
+.renewal-current span,.renewal-current small{display:block;color:#777d78;font-size:10px;text-transform:uppercase;letter-spacing:1px}
+.renewal-current strong{display:block;font-family:var(--serif);font-size:20px;font-weight:500;margin:5px 0}
+.renewal-current small{font-size:11px;text-transform:none;letter-spacing:0}
+.renewal-new-label{display:flex;flex-direction:row;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding-bottom:4px}
+.renewal-new-label strong{color:var(--text)}
+.renewal-new-label span{color:var(--muted);font-size:11px}
+.renewal-note{margin-top:15px;padding:11px 13px;background:#f4f5f1;border-radius:9px}
+
+@media(max-width:600px){
+  .modal-backdrop{padding:8px;align-items:flex-end}
+  .modal,.modal.wide{width:100%;max-height:94vh;border-radius:17px 17px 10px 10px;padding:20px 17px}
+  .modal-head{margin-bottom:19px}
+  .modal-head h2{font-size:25px}
+  .form-grid{grid-template-columns:1fr;gap:13px}
+  .form-grid label.full{grid-column:auto}
+  .modal-actions{position:sticky;bottom:-20px;background:var(--paper);padding:13px 0 4px;flex-direction:column-reverse}
+  .modal-actions button{width:100%}
+  .toolbar{align-items:stretch;flex-direction:column}
+  .table-search{width:100%}
+  .toolbar select{width:100%}
+  .table-panel{border-radius:12px}
+  .table-actions{gap:6px}
+  .table-actions button{padding:9px 11px}
+  .billing-calculation{padding:13px}
+  .billing-calculation .billing-total{font-size:16px}
+}
