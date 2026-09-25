@@ -668,15 +668,10 @@ function downloadClientBilling(clientId, billingOptions = {}) {
           </section>
 
           <section class="client-grid">
-            <div class="client-cell">
+            <div class="client-cell" style="grid-column: 1 / -1;">
               <div class="section-kicker">Cliente</div>
               <div class="client-name">${escapeHtml(client.name || "Cliente")}</div>
               ${client.document ? `<div class="client-detail">${escapeHtml(client.document)}</div>` : ""}
-            </div>
-            <div class="client-cell">
-              <div class="section-kicker">Comprobante</div>
-              <div class="client-name" style="font-family:Arial,Helvetica,sans-serif;font-size:10px;">Recibo por Honorarios</div>
-              <div class="client-detail">La retención, cuando corresponda, se aplica al Recibo por Honorarios.</div>
             </div>
           </section>
 
@@ -702,7 +697,7 @@ function downloadClientBilling(clientId, billingOptions = {}) {
           <div class="total-area">
             <div class="total-box">
               <div class="total-row gross">
-                <span>TOTAL POR HONORARIOS</span>
+                <span>${applyRetention ? "TOTAL POR HONORARIOS" : "TOTAL A PAGAR"}</span>
                 <strong>${money(gross, currency)}</strong>
               </div>
               ${applyRetention ? `
@@ -710,16 +705,16 @@ function downloadClientBilling(clientId, billingOptions = {}) {
                   <span>Retención (${rate} %) IR</span>
                   <strong>${money(retained, currency)}</strong>
                 </div>
-              ` : ""}
-              <div class="total-row net">
-                <span>TOTAL NETO RECIBIDO</span>
-                <strong>${money(net, currency)}</strong>
-              </div>
-              <div class="tax-note">
-                ${applyRetention
-                  ? `La retención corresponde al ${rate}% del importe total de los honorarios cuando corresponde. No constituye un descuento comercial.`
-                  : `Importe total de honorarios correspondiente a los servicios detallados.`}
-              </div>
+                <div class="total-row net">
+                  <span>TOTAL NETO RECIBIDO</span>
+                  <strong>${money(net, currency)}</strong>
+                </div>
+                <div class="tax-note">
+                  La retención corresponde al ${rate}% del importe total de los honorarios cuando corresponde. No constituye un descuento comercial.
+                </div>
+              ` : `
+                <div class="tax-note">Importe correspondiente a los servicios detallados y a los periodos indicados.</div>
+              `}
             </div>
           </div>
 
