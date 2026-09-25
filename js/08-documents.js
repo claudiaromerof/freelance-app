@@ -56,6 +56,102 @@ function printDocument(html, title) {
   }, 500);
 }
 
+/*
+ * Genera el PDF directamente como una sola hoja A4.
+ * Se usa html2canvas para capturar todo el documento y jsPDF para
+ * colocarlo dentro de una única página A4, evitando la paginación
+ * automática del diálogo de impresión del navegador.
+ */
+function downloadPdfFromHtml(html, title, filename) {
+  const win = window.open("", "_blank");
+
+  if (!win) {
+    toast("El navegador bloqueó la ventana. Permite ventanas emergentes.");
+    return;
+  }
+
+  const libraries = `
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  `;
+
+  const pdfHtml = html.replace("</head>", `${libraries}</head>`);
+
+  const generate = async () => {
+    try {
+      if (!win.html2canvas || !win.jspdf || !win.jspdf.jsPDF) {
+        throw new Error("No se pudieron cargar las librerías para PDF.");
+      }
+
+      await new Promise(resolve => {
+        if (win.document.fonts && win.document.fonts.ready) {
+          win.document.fonts.ready.then(() => setTimeout(resolve, 150));
+        } else {
+          setTimeout(resolve, 300);
+        }
+      });
+
+      const page = win.document.querySelector(".page");
+      if (!page) throw new Error("No se encontró el documento A4.");
+
+      /*
+       * Para la descarga directa no forzamos height:297mm.
+       * Capturamos el contenido completo y luego lo reducimos proporcionalmente
+       * si fuese necesario para que todo quepa en una sola hoja A4.
+       */
+      page.style.height = "auto";
+      page.style.minHeight = "0";
+      page.style.overflow = "visible";
+      page.style.margin = "0";
+      page.style.boxShadow = "none";
+
+      const canvas = await win.html2canvas(page, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: "#fffefa",
+        logging: false,
+        windowWidth: Math.max(win.document.documentElement.clientWidth, page.scrollWidth)
+      });
+
+      const pageWidthPx = page.getBoundingClientRect().width;
+      const pxPerMm = pageWidthPx / 210;
+      const imageWidthMm = canvas.width / pxPerMm / 2;
+      const imageHeightMm = canvas.height / pxPerMm / 2;
+
+      const fitScale = Math.min(1, 210 / imageWidthMm, 297 / imageHeightMm);
+      const pdfWidth = imageWidthMm * fitScale;
+      const pdfHeight = imageHeightMm * fitScale;
+      const x = (210 - pdfWidth) / 2;
+      const y = (297 - pdfHeight) / 2;
+
+      const { jsPDF } = win.jspdf;
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+        compress: true
+      });
+
+      const image = canvas.toDataURL("image/jpeg", 0.95);
+      pdf.addImage(image, "JPEG", x, y, pdfWidth, pdfHeight, undefined, "FAST");
+      pdf.save(filename);
+
+      setTimeout(() => win.close(), 300);
+    } catch (error) {
+      console.error("Error generando PDF:", error);
+      try { win.close(); } catch (_) {}
+      toast("No se pudo generar el PDF. Intenta nuevamente.");
+    }
+  };
+
+  win.addEventListener("load", generate, { once: true });
+  win.document.open();
+  win.document.write(pdfHtml);
+  win.document.close();
+  win.document.title = title;
+}
+
 /* =========================================================
    ESTILO EDITORIAL A4
    ========================================================= */
@@ -100,7 +196,7 @@ function documentStyles() {
         height: 297mm;
         min-height: 297mm;
         margin: 16px auto;
-        padding: 17mm 18mm 19mm;
+        padding: 12mm 16mm 11mm;
         background: var(--paper);
         box-shadow: 0 16px 50px rgba(0,0,0,.10);
         overflow: hidden;
@@ -110,7 +206,7 @@ function documentStyles() {
         width: 100%;
         height: 2px;
         background: var(--ink);
-        margin-bottom: 18mm;
+        margin-bottom: 9mm;
       }
 
       .brand-header {
@@ -118,7 +214,7 @@ function documentStyles() {
         grid-template-columns: 58px 1fr;
         gap: 16px;
         align-items: center;
-        padding-bottom: 13px;
+        padding-bottom: 9px;
         border-bottom: 1px solid var(--hairline);
       }
 
@@ -147,7 +243,7 @@ function documentStyles() {
         justify-content: space-between;
         gap: 24px;
         align-items: flex-end;
-        padding: 17mm 0 11mm;
+        padding: 9mm 0 7mm;
       }
 
       .document-type {
@@ -192,7 +288,7 @@ function documentStyles() {
       }
 
       .client-cell {
-        padding: 11px 0;
+        padding: 7px 0;
       }
 
       .client-cell + .client-cell {
@@ -216,14 +312,14 @@ function documentStyles() {
       }
 
       .client-detail {
-        margin-top: 3px;
+        margin-top: 2px;
         color: var(--soft-ink);
         font-size: 8.5px;
         line-height: 1.55;
       }
 
       .intro {
-        margin: 12mm 0 0;
+        margin: 7mm 0 0;
         max-width: 155mm;
         color: var(--soft-ink);
         font-family: Georgia, "Times New Roman", serif;
@@ -233,12 +329,12 @@ function documentStyles() {
 
       .items {
         width: 100%;
-        margin-top: 10mm;
+        margin-top: 6mm;
         border-collapse: collapse;
       }
 
       .items thead th {
-        padding: 8px 7px;
+        padding: 6px 6px;
         border-top: 1px solid var(--ink);
         border-bottom: 1px solid var(--hairline);
         color: var(--muted);
@@ -250,7 +346,7 @@ function documentStyles() {
       }
 
       .items tbody td {
-        padding: 11px 7px;
+        padding: 7px 6px;
         border-bottom: 1px solid var(--hairline);
         color: var(--soft-ink);
         font-size: 8.5px;
@@ -270,7 +366,7 @@ function documentStyles() {
       }
 
       .item-sub {
-        margin-top: 3px;
+        margin-top: 2px;
         color: var(--muted);
         font-size: 7.5px;
       }
@@ -278,7 +374,7 @@ function documentStyles() {
       .total-area {
         display: flex;
         justify-content: flex-end;
-        margin-top: 10mm;
+        margin-top: 6mm;
       }
 
       .total-box {
@@ -291,7 +387,7 @@ function documentStyles() {
         display: flex;
         justify-content: space-between;
         gap: 20px;
-        padding: 4px 0;
+        padding: 3px 0;
         color: var(--soft-ink);
         font-size: 8.5px;
       }
@@ -302,7 +398,7 @@ function documentStyles() {
       }
 
       .total-row.gross {
-        padding: 3px 0 9px;
+        padding: 3px 0 6px;
         color: var(--ink);
         font-size: 10px;
       }
@@ -314,14 +410,14 @@ function documentStyles() {
       }
 
       .total-row.retention {
-        padding: 8px 0;
+        padding: 5px 0;
         border-top: 1px solid var(--hairline);
         color: var(--muted);
       }
 
       .total-row.net {
-        margin-top: 2px;
-        padding-top: 9px;
+        margin-top: 1px;
+        padding-top: 6px;
         border-top: 1px solid var(--hairline);
         color: var(--ink);
         font-size: 9px;
@@ -335,7 +431,7 @@ function documentStyles() {
       }
 
       .tax-note {
-        margin-top: 7px;
+        margin-top: 5px;
         color: var(--muted);
         font-size: 7px;
         line-height: 1.55;
@@ -344,12 +440,12 @@ function documentStyles() {
       .information-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 9mm;
-        margin-top: 12mm;
+        gap: 6mm;
+        margin-top: 7mm;
       }
 
       .information-block {
-        padding-top: 9px;
+        padding-top: 6px;
         border-top: 1px solid var(--hairline);
       }
 
@@ -364,8 +460,8 @@ function documentStyles() {
       .information-block ul { padding-left: 14px; }
 
       .payment-details {
-        margin-top: 9mm;
-        padding: 10px 12px;
+        margin-top: 6mm;
+        padding: 8px 10px;
         background: var(--warm);
         border: 1px solid var(--hairline);
       }
@@ -373,7 +469,7 @@ function documentStyles() {
       .payment-grid {
         display: grid;
         grid-template-columns: repeat(2, minmax(0,1fr));
-        gap: 8px 18px;
+        gap: 6px 14px;
       }
 
       .payment-grid span {
@@ -393,11 +489,9 @@ function documentStyles() {
 
 
       .footer {
-        position: absolute;
-        left: 18mm;
-        right: 18mm;
-        bottom: 11mm;
-        padding-top: 8px;
+        position: static;
+        margin: 7mm 0 0;
+        padding-top: 6px;
         border-top: 1px solid var(--hairline);
         display: flex;
         justify-content: space-between;
@@ -422,40 +516,38 @@ function documentStyles() {
 
 
       .billing-period {
-        margin-top: 10mm;
-        padding: 10px 12px;
+        margin-top: 6mm;
+        padding: 8px 10px;
         border-left: 2px solid var(--ink);
         background: var(--warm);
       }
 
       .billing-period strong {
         display: block;
-        margin-top: 3px;
+        margin-top: 2px;
         font-family: Georgia, "Times New Roman", serif;
         font-size: 13px;
         font-weight: 400;
       }
 
       .billing-period .small-note {
-        margin-top: 4px;
+        margin-top: 2px;
         color: var(--muted);
         font-size: 7px;
       }
 
       .note {
-        margin-top: 8mm;
-        padding-top: 8px;
+        margin-top: 5mm;
+        padding-top: 6px;
         border-top: 1px solid var(--hairline);
         color: var(--soft-ink);
         font-size: 7.5px;
         line-height: 1.6;
       }
 
-      /* Cotizaciones: una sola hoja A4 */
+      /* Documento A4: el PDF directo ajusta el contenido completo a una sola hoja. */
       .quote-page {
-        height: 297mm;
         min-height: 297mm;
-        overflow: hidden;
       }
 
       .quote-content {
@@ -484,7 +576,42 @@ function documentStyles() {
       }
 
       .quote-page .information-grid {
-        margin-top: 9mm;
+        margin-top: 6mm;
+      }
+
+      .quote-page .footer {
+        margin-top: 6mm;
+      }
+
+      .page:not(.quote-page) .document-head {
+        padding-top: 7mm;
+        padding-bottom: 5mm;
+      }
+
+      .page:not(.quote-page) .billing-period {
+        margin-top: 6mm;
+      }
+
+      .page:not(.quote-page) .items {
+        margin-top: 5mm;
+      }
+
+      .page:not(.quote-page) .items tbody td {
+        padding-top: 6px;
+        padding-bottom: 6px;
+      }
+
+      .page:not(.quote-page) .total-area {
+        margin-top: 6mm;
+      }
+
+      .page:not(.quote-page) .note {
+        margin-top: 4mm;
+      }
+
+      .page:not(.quote-page) .payment-details {
+        margin-top: 5mm;
+        padding: 7px 9px;
       }
 
       .quote-page .information-block {
@@ -578,9 +705,8 @@ function downloadQuote(id) {
               ${client.document ? `<div class="client-detail">${escapeHtml(client.document)}</div>` : ""}
             </div>
             <div class="client-cell">
-              <div class="section-kicker">Condición</div>
-              <div class="client-name" style="font-family:Arial,Helvetica,sans-serif;font-size:10px;">Recibo por Honorarios</div>
-              <div class="client-detail">Validez de la propuesta: ${validity}</div>
+              <div class="section-kicker">Validez</div>
+              <div class="client-name" style="font-family:Arial,Helvetica,sans-serif;font-size:10px;">${validity}</div>
             </div>
           </section>
 
@@ -589,14 +715,10 @@ function downloadQuote(id) {
           <div class="total-area">
             <div class="total-box">
               <div class="total-row gross">
-                <span>TOTAL POR HONORARIOS</span>
+                <span>TOTAL DE LA PROPUESTA</span>
                 <strong>${money(total, currency)}</strong>
               </div>
-              <div class="total-row net">
-                <span>TOTAL NETO RECIBIDO</span>
-                <strong>${money(total, currency)}</strong>
-              </div>
-              <div class="tax-note">La retención, cuando corresponda, se determina al momento de emitir y pagar el Recibo por Honorarios. No modifica el valor comercial de esta cotización.</div>
+              <div class="tax-note">El importe corresponde al valor comercial de la propuesta. Los aspectos tributarios se determinan, cuando corresponda, al momento de emitir el comprobante respectivo.</div>
             </div>
           </div>
 
@@ -654,7 +776,11 @@ function downloadQuote(id) {
     </html>
   `;
 
-  printDocument(html, `Cotización ${number} — Claudia R.`);
+  downloadPdfFromHtml(
+    html,
+    `Cotización ${number} — Claudia R.`,
+    `Cotizacion-${String(quote.id || "CRF").replace(/[^a-zA-Z0-9_-]/g, "-")}.pdf`
+  );
 }
 
 /* =========================================================
@@ -809,5 +935,9 @@ function downloadClientBilling(clientId, billingOptions = {}) {
     </html>
   `;
 
-  printDocument(html, `${billingId} — ${client.name}`);
+  downloadPdfFromHtml(
+    html,
+    `${billingId} — ${client.name}`,
+    `Resumen-Cobro-${String(billingId).replace(/[^a-zA-Z0-9_-]/g, "-")}.pdf`
+  );
 }
