@@ -56,6 +56,102 @@ function printDocument(html, title) {
   }, 500);
 }
 
+/*
+ * Genera el PDF directamente como una sola hoja A4.
+ * Se usa html2canvas para capturar todo el documento y jsPDF para
+ * colocarlo dentro de una única página A4, evitando la paginación
+ * automática del diálogo de impresión del navegador.
+ */
+function downloadPdfFromHtml(html, title, filename) {
+  const win = window.open("", "_blank");
+
+  if (!win) {
+    toast("El navegador bloqueó la ventana. Permite ventanas emergentes.");
+    return;
+  }
+
+  const libraries = `
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  `;
+
+  const pdfHtml = html.replace("</head>", `${libraries}</head>`);
+
+  const generate = async () => {
+    try {
+      if (!win.html2canvas || !win.jspdf || !win.jspdf.jsPDF) {
+        throw new Error("No se pudieron cargar las librerías para PDF.");
+      }
+
+      await new Promise(resolve => {
+        if (win.document.fonts && win.document.fonts.ready) {
+          win.document.fonts.ready.then(() => setTimeout(resolve, 150));
+        } else {
+          setTimeout(resolve, 300);
+        }
+      });
+
+      const page = win.document.querySelector(".page");
+      if (!page) throw new Error("No se encontró el documento A4.");
+
+      /*
+       * Para la descarga directa no forzamos height:297mm.
+       * Capturamos el contenido completo y luego lo reducimos proporcionalmente
+       * si fuese necesario para que todo quepa en una sola hoja A4.
+       */
+      page.style.height = "auto";
+      page.style.minHeight = "0";
+      page.style.overflow = "visible";
+      page.style.margin = "0";
+      page.style.boxShadow = "none";
+
+      const canvas = await win.html2canvas(page, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: "#fffefa",
+        logging: false,
+        windowWidth: Math.max(win.document.documentElement.clientWidth, page.scrollWidth)
+      });
+
+      const pageWidthPx = page.getBoundingClientRect().width;
+      const pxPerMm = pageWidthPx / 210;
+      const imageWidthMm = canvas.width / pxPerMm / 2;
+      const imageHeightMm = canvas.height / pxPerMm / 2;
+
+      const fitScale = Math.min(1, 210 / imageWidthMm, 297 / imageHeightMm);
+      const pdfWidth = imageWidthMm * fitScale;
+      const pdfHeight = imageHeightMm * fitScale;
+      const x = (210 - pdfWidth) / 2;
+      const y = (297 - pdfHeight) / 2;
+
+      const { jsPDF } = win.jspdf;
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+        compress: true
+      });
+
+      const image = canvas.toDataURL("image/jpeg", 0.95);
+      pdf.addImage(image, "JPEG", x, y, pdfWidth, pdfHeight, undefined, "FAST");
+      pdf.save(filename);
+
+      setTimeout(() => win.close(), 300);
+    } catch (error) {
+      console.error("Error generando PDF:", error);
+      try { win.close(); } catch (_) {}
+      toast("No se pudo generar el PDF. Intenta nuevamente.");
+    }
+  };
+
+  win.addEventListener("load", generate, { once: true });
+  win.document.open();
+  win.document.write(pdfHtml);
+  win.document.close();
+  win.document.title = title;
+}
+
 /* =========================================================
    ESTILO EDITORIAL A4
    ========================================================= */
@@ -578,9 +674,8 @@ function downloadQuote(id) {
               ${client.document ? `<div class="client-detail">${escapeHtml(client.document)}</div>` : ""}
             </div>
             <div class="client-cell">
-              <div class="section-kicker">Condición</div>
-              <div class="client-name" style="font-family:Arial,Helvetica,sans-serif;font-size:10px;">Recibo por Honorarios</div>
-              <div class="client-detail">Validez de la propuesta: ${validity}</div>
+              <div class="section-kicker">Validez</div>
+              <div class="client-name" style="font-family:Arial,Helvetica,sans-serif;font-size:10px;">${validity}</div>
             </div>
           </section>
 
@@ -589,14 +684,10 @@ function downloadQuote(id) {
           <div class="total-area">
             <div class="total-box">
               <div class="total-row gross">
-                <span>TOTAL POR HONORARIOS</span>
+                <span>TOTAL DE LA PROPUESTA</span>
                 <strong>${money(total, currency)}</strong>
               </div>
-              <div class="total-row net">
-                <span>TOTAL NETO RECIBIDO</span>
-                <strong>${money(total, currency)}</strong>
-              </div>
-              <div class="tax-note">La retención, cuando corresponda, se determina al momento de emitir y pagar el Recibo por Honorarios. No modifica el valor comercial de esta cotización.</div>
+              <div class="tax-note">El importe corresponde al valor comercial de la propuesta. Los aspectos tributarios se determinan, cuando corresponda, al momento de emitir el comprobante respectivo.</div>
             </div>
           </div>
 
@@ -654,7 +745,11 @@ function downloadQuote(id) {
     </html>
   `;
 
-  printDocument(html, `Cotización ${number} — Claudia R.`);
+  downloadPdfFromHtml(
+    html,
+    `Cotización ${number} — Claudia R.`,
+    `Cotizacion-${String(quote.id || "CRF").replace(/[^a-zA-Z0-9_-]/g, "-")}.pdf`
+  );
 }
 
 /* =========================================================
