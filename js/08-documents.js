@@ -489,10 +489,8 @@ function documentStyles() {
 
 
       .footer {
-        position: absolute;
-        left: 18mm;
-        right: 18mm;
-        bottom: 11mm;
+        position: static;
+        margin: 14mm 0 0;
         padding-top: 8px;
         border-top: 1px solid var(--hairline);
         display: flex;
@@ -547,11 +545,9 @@ function documentStyles() {
         line-height: 1.6;
       }
 
-      /* Cotizaciones: una sola hoja A4 */
+      /* Documento A4: el PDF directo ajusta el contenido completo a una sola hoja. */
       .quote-page {
-        height: 297mm;
         min-height: 297mm;
-        overflow: hidden;
       }
 
       .quote-content {
@@ -904,5 +900,9 @@ function downloadClientBilling(clientId, billingOptions = {}) {
     </html>
   `;
 
-  printDocument(html, `${billingId} — ${client.name}`);
+  downloadPdfFromHtml(
+    html,
+    `${billingId} — ${client.name}`,
+    `Resumen-Cobro-${String(billingId).replace(/[^a-zA-Z0-9_-]/g, "-")}.pdf`
+  );
 }
