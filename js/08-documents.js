@@ -94,6 +94,10 @@ function downloadPdfFromHtml(html, title, filename) {
       const page = win.document.querySelector(".page");
       if (!page) throw new Error("No se encontró el documento A4.");
 
+      // El footer debe formar parte del flujo del documento durante la captura.
+      // Así nunca puede montarse sobre los datos bancarios.
+      page.classList.add("pdf-capture");
+
       /*
        * Para la descarga directa no forzamos height:297mm.
        * Capturamos el contenido completo y luego lo reducimos proporcionalmente
@@ -104,6 +108,7 @@ function downloadPdfFromHtml(html, title, filename) {
       page.style.overflow = "visible";
       page.style.margin = "0";
       page.style.boxShadow = "none";
+      page.style.transform = "none";
 
       const canvas = await win.html2canvas(page, {
         scale: 2,
@@ -196,7 +201,7 @@ function documentStyles() {
         height: 297mm;
         min-height: 297mm;
         margin: 16px auto;
-        padding: 12mm 16mm 11mm;
+        padding: 17mm 18mm 19mm;
         background: var(--paper);
         box-shadow: 0 16px 50px rgba(0,0,0,.10);
         overflow: hidden;
@@ -206,7 +211,7 @@ function documentStyles() {
         width: 100%;
         height: 2px;
         background: var(--ink);
-        margin-bottom: 9mm;
+        margin-bottom: 18mm;
       }
 
       .brand-header {
@@ -214,7 +219,7 @@ function documentStyles() {
         grid-template-columns: 58px 1fr;
         gap: 16px;
         align-items: center;
-        padding-bottom: 9px;
+        padding-bottom: 13px;
         border-bottom: 1px solid var(--hairline);
       }
 
@@ -243,7 +248,7 @@ function documentStyles() {
         justify-content: space-between;
         gap: 24px;
         align-items: flex-end;
-        padding: 9mm 0 7mm;
+        padding: 17mm 0 11mm;
       }
 
       .document-type {
@@ -288,7 +293,7 @@ function documentStyles() {
       }
 
       .client-cell {
-        padding: 7px 0;
+        padding: 11px 0;
       }
 
       .client-cell + .client-cell {
@@ -312,14 +317,14 @@ function documentStyles() {
       }
 
       .client-detail {
-        margin-top: 2px;
+        margin-top: 3px;
         color: var(--soft-ink);
         font-size: 8.5px;
         line-height: 1.55;
       }
 
       .intro {
-        margin: 7mm 0 0;
+        margin: 12mm 0 0;
         max-width: 155mm;
         color: var(--soft-ink);
         font-family: Georgia, "Times New Roman", serif;
@@ -329,12 +334,12 @@ function documentStyles() {
 
       .items {
         width: 100%;
-        margin-top: 6mm;
+        margin-top: 10mm;
         border-collapse: collapse;
       }
 
       .items thead th {
-        padding: 6px 6px;
+        padding: 8px 7px;
         border-top: 1px solid var(--ink);
         border-bottom: 1px solid var(--hairline);
         color: var(--muted);
@@ -346,7 +351,7 @@ function documentStyles() {
       }
 
       .items tbody td {
-        padding: 7px 6px;
+        padding: 11px 7px;
         border-bottom: 1px solid var(--hairline);
         color: var(--soft-ink);
         font-size: 8.5px;
@@ -366,7 +371,7 @@ function documentStyles() {
       }
 
       .item-sub {
-        margin-top: 2px;
+        margin-top: 3px;
         color: var(--muted);
         font-size: 7.5px;
       }
@@ -374,7 +379,7 @@ function documentStyles() {
       .total-area {
         display: flex;
         justify-content: flex-end;
-        margin-top: 6mm;
+        margin-top: 10mm;
       }
 
       .total-box {
@@ -387,7 +392,7 @@ function documentStyles() {
         display: flex;
         justify-content: space-between;
         gap: 20px;
-        padding: 3px 0;
+        padding: 4px 0;
         color: var(--soft-ink);
         font-size: 8.5px;
       }
@@ -398,7 +403,7 @@ function documentStyles() {
       }
 
       .total-row.gross {
-        padding: 3px 0 6px;
+        padding: 3px 0 9px;
         color: var(--ink);
         font-size: 10px;
       }
@@ -410,14 +415,14 @@ function documentStyles() {
       }
 
       .total-row.retention {
-        padding: 5px 0;
+        padding: 8px 0;
         border-top: 1px solid var(--hairline);
         color: var(--muted);
       }
 
       .total-row.net {
-        margin-top: 1px;
-        padding-top: 6px;
+        margin-top: 2px;
+        padding-top: 9px;
         border-top: 1px solid var(--hairline);
         color: var(--ink);
         font-size: 9px;
@@ -431,7 +436,7 @@ function documentStyles() {
       }
 
       .tax-note {
-        margin-top: 5px;
+        margin-top: 7px;
         color: var(--muted);
         font-size: 7px;
         line-height: 1.55;
@@ -440,12 +445,12 @@ function documentStyles() {
       .information-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 6mm;
-        margin-top: 7mm;
+        gap: 9mm;
+        margin-top: 12mm;
       }
 
       .information-block {
-        padding-top: 6px;
+        padding-top: 9px;
         border-top: 1px solid var(--hairline);
       }
 
@@ -460,8 +465,8 @@ function documentStyles() {
       .information-block ul { padding-left: 14px; }
 
       .payment-details {
-        margin-top: 6mm;
-        padding: 8px 10px;
+        margin-top: 9mm;
+        padding: 10px 12px;
         background: var(--warm);
         border: 1px solid var(--hairline);
       }
@@ -469,7 +474,7 @@ function documentStyles() {
       .payment-grid {
         display: grid;
         grid-template-columns: repeat(2, minmax(0,1fr));
-        gap: 6px 14px;
+        gap: 8px 18px;
       }
 
       .payment-grid span {
@@ -489,9 +494,11 @@ function documentStyles() {
 
 
       .footer {
-        position: static;
-        margin: 7mm 0 0;
-        padding-top: 6px;
+        position: absolute;
+        left: 18mm;
+        right: 18mm;
+        bottom: 11mm;
+        padding-top: 8px;
         border-top: 1px solid var(--hairline);
         display: flex;
         justify-content: space-between;
@@ -516,38 +523,40 @@ function documentStyles() {
 
 
       .billing-period {
-        margin-top: 6mm;
-        padding: 8px 10px;
+        margin-top: 10mm;
+        padding: 10px 12px;
         border-left: 2px solid var(--ink);
         background: var(--warm);
       }
 
       .billing-period strong {
         display: block;
-        margin-top: 2px;
+        margin-top: 3px;
         font-family: Georgia, "Times New Roman", serif;
         font-size: 13px;
         font-weight: 400;
       }
 
       .billing-period .small-note {
-        margin-top: 2px;
+        margin-top: 4px;
         color: var(--muted);
         font-size: 7px;
       }
 
       .note {
-        margin-top: 5mm;
-        padding-top: 6px;
+        margin-top: 8mm;
+        padding-top: 8px;
         border-top: 1px solid var(--hairline);
         color: var(--soft-ink);
         font-size: 7.5px;
         line-height: 1.6;
       }
 
-      /* Documento A4: el PDF directo ajusta el contenido completo a una sola hoja. */
+      /* Cotizaciones: una sola hoja A4 */
       .quote-page {
+        height: 297mm;
         min-height: 297mm;
+        overflow: hidden;
       }
 
       .quote-content {
@@ -576,47 +585,33 @@ function documentStyles() {
       }
 
       .quote-page .information-grid {
-        margin-top: 6mm;
-      }
-
-      .quote-page .footer {
-        margin-top: 6mm;
-      }
-
-      .page:not(.quote-page) .document-head {
-        padding-top: 7mm;
-        padding-bottom: 5mm;
-      }
-
-      .page:not(.quote-page) .billing-period {
-        margin-top: 6mm;
-      }
-
-      .page:not(.quote-page) .items {
-        margin-top: 5mm;
-      }
-
-      .page:not(.quote-page) .items tbody td {
-        padding-top: 6px;
-        padding-bottom: 6px;
-      }
-
-      .page:not(.quote-page) .total-area {
-        margin-top: 6mm;
-      }
-
-      .page:not(.quote-page) .note {
-        margin-top: 4mm;
-      }
-
-      .page:not(.quote-page) .payment-details {
-        margin-top: 5mm;
-        padding: 7px 9px;
+        margin-top: 9mm;
       }
 
       .quote-page .information-block {
         max-height: 42mm;
         overflow: hidden;
+      }
+
+      /* Durante la generación directa del PDF, el footer ocupa espacio real. */
+      .pdf-capture .footer {
+        position: static !important;
+        left: auto !important;
+        right: auto !important;
+        bottom: auto !important;
+        width: 100%;
+        margin-top: 10mm;
+        margin-bottom: 0;
+      }
+
+      .pdf-capture .payment-details {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+
+      .pdf-capture .note {
+        break-inside: avoid;
+        page-break-inside: avoid;
       }
 
       @media print {
@@ -938,6 +933,6 @@ function downloadClientBilling(clientId, billingOptions = {}) {
   downloadPdfFromHtml(
     html,
     `${billingId} — ${client.name}`,
-    `Resumen-Cobro-${String(billingId).replace(/[^a-zA-Z0-9_-]/g, "-")}.pdf`
+    `Resumen-de-cobro-${String(billingId || client.name || "CRF").replace(/[^a-zA-Z0-9_-]/g, "-")}.pdf`
   );
 }
