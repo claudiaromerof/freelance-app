@@ -97,7 +97,6 @@ function documentStyles() {
       .page {
         position: relative;
         width: 210mm;
-        height: 297mm;
         min-height: 297mm;
         margin: 16px auto;
         padding: 17mm 18mm 19mm;
@@ -451,54 +450,12 @@ function documentStyles() {
         line-height: 1.6;
       }
 
-      /* Cotizaciones: una sola hoja A4 */
-      .quote-page {
-        height: 297mm;
-        min-height: 297mm;
-        overflow: hidden;
-      }
-
-      .quote-content {
-        transform-origin: top left;
-        width: 100%;
-      }
-
-      .quote-page .document-head,
-      .quote-page .client-grid,
-      .quote-page .intro,
-      .quote-page .total-area,
-      .quote-page .information-grid,
-      .quote-page .information-block {
-        break-inside: avoid;
-        page-break-inside: avoid;
-      }
-
-      .quote-page .document-title {
-        max-width: 125mm;
-        line-height: 1.04;
-      }
-
-      .quote-page .intro {
-        max-height: 34mm;
-        overflow: hidden;
-      }
-
-      .quote-page .information-grid {
-        margin-top: 9mm;
-      }
-
-      .quote-page .information-block {
-        max-height: 42mm;
-        overflow: hidden;
-      }
-
       @media print {
         html, body { background: #fff; }
         body { min-width: 0; }
         .page {
           margin: 0;
           width: 210mm;
-          height: 297mm;
           min-height: 297mm;
           box-shadow: none;
         }
@@ -551,8 +508,7 @@ function downloadQuote(id) {
         ${documentStyles()}
       </head>
       <body>
-        <main class="page quote-page">
-          <div class="quote-content">
+        <main class="page">
           <div class="top-rule"></div>
 
           <header class="brand-header">
@@ -615,41 +571,11 @@ function downloadQuote(id) {
             </div>
           </section>
 
-          </div>
-
           <footer class="footer">
             <div class="footer-crf">CRF</div>
             <div class="footer-descriptor">Comunicación · Desarrollo Web · Estrategia Digital</div>
           </footer>
         </main>
-          <script>
-            (function fitQuoteToA4() {
-              const page = document.querySelector('.quote-page');
-              const content = document.querySelector('.quote-content');
-              if (!page || !content) return;
-
-              const fit = () => {
-                content.style.zoom = '1';
-                const pageHeight = page.clientHeight;
-                const footer = page.querySelector('.footer');
-                const footerHeight = footer ? footer.getBoundingClientRect().height + 28 : 60;
-                const available = Math.max(300, pageHeight - footerHeight);
-                const needed = content.scrollHeight;
-
-                if (needed > available) {
-                  const ratio = Math.max(0.68, Math.min(1, available / needed));
-                  content.style.zoom = ratio.toFixed(4);
-                }
-              };
-
-              if (document.fonts && document.fonts.ready) {
-                document.fonts.ready.then(() => requestAnimationFrame(fit));
-              } else {
-                requestAnimationFrame(fit);
-              }
-              window.addEventListener('beforeprint', fit);
-            })();
-          </script>
       </body>
     </html>
   `;
@@ -741,8 +667,8 @@ function downloadClientBilling(clientId, billingOptions = {}) {
             </div>
           </section>
 
-          <section class="client-grid" style="grid-template-columns:1fr;">
-            <div class="client-cell">
+          <section class="client-grid">
+            <div class="client-cell" style="grid-column: 1 / -1;">
               <div class="section-kicker">Cliente</div>
               <div class="client-name">${escapeHtml(client.name || "Cliente")}</div>
               ${client.document ? `<div class="client-detail">${escapeHtml(client.document)}</div>` : ""}
@@ -783,9 +709,11 @@ function downloadClientBilling(clientId, billingOptions = {}) {
                   <span>TOTAL NETO RECIBIDO</span>
                   <strong>${money(net, currency)}</strong>
                 </div>
-                <div class="tax-note">La retención corresponde al ${rate}% del importe total de los honorarios cuando corresponde. No constituye un descuento comercial.</div>
+                <div class="tax-note">
+                  La retención corresponde al ${rate}% del importe total de los honorarios cuando corresponde. No constituye un descuento comercial.
+                </div>
               ` : `
-                <div class="tax-note">Importe total correspondiente a los servicios detallados.</div>
+                <div class="tax-note">Importe correspondiente a los servicios detallados y a los periodos indicados.</div>
               `}
             </div>
           </div>
